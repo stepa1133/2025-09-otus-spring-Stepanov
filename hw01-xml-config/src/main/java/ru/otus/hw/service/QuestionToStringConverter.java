@@ -21,7 +21,7 @@ public class QuestionToStringConverter implements QuestionConverter {
     }
 
     private String converAnswerToString(Answer answer) {
-        return String.format("%s - %s\n", answer.isCorrect(), answer.text());
+        return String.format("%s\n", answer.text());
     }
 
 

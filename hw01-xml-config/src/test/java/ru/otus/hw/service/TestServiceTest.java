@@ -14,10 +14,14 @@ import ru.otus.hw.domain.Question;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 
-public class TestServiceImplTest {
+public class TestServiceTest {
 
     private TestServiceImpl testService;
     private IOService ioService;
@@ -29,8 +33,9 @@ public class TestServiceImplTest {
     void setUp() {
         ioService = mock(StreamsIOService.class);
         csvQuestionDao = mock(CsvQuestionDao.class);
-        questionConverter = mock(QuestionToStringConverter.class);
-        inOrder = inOrder(csvQuestionDao, questionConverter);
+        QuestionToStringConverter realConverter = new QuestionToStringConverter();
+        questionConverter = spy(realConverter);
+        inOrder = inOrder(ioService, csvQuestionDao, questionConverter);
         testService = new TestServiceImpl(ioService, csvQuestionDao, questionConverter);
     }
 
@@ -56,16 +61,21 @@ public class TestServiceImplTest {
         testService.executeTest();
 
         var captor = ArgumentCaptor.forClass(Question.class);
+
+        inOrder.verify(ioService, times(1)).printLine("");
+        inOrder.verify(ioService, times(1)).printFormattedLine("Please answer the questions below%n");
         inOrder.verify(csvQuestionDao , times(1)).findAll();
         inOrder.verify(questionConverter , times(expected.size())).convertQuestionToString(captor.capture());
 
-        var actual = csvQuestionDao.findAll();
-        assertThat(actual).isEqualTo(expected);
+        List<Question> questionConverterArguments = captor.getAllValues();
+        assertThat(questionConverterArguments).isEqualTo(expected); //checking that the convertQuestionToString() method received  unchanged arguments
+
+        for (Question questionConverterArgument : questionConverterArguments) {
+            String convertResult = questionConverter.convertQuestionToString(questionConverterArgument);
+            assertTrue(convertResult.matches(".*\\?\n(\\d{1,2}\\. .*\n){1,10}"));
+        }
+
 
     }
-
-
-
-
 
 }
