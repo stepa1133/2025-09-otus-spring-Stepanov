@@ -3,6 +3,7 @@ package ru.otus.hw.dao;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import ru.otus.hw.config.TestFileNameProvider;
 import ru.otus.hw.dao.dto.QuestionDto;
 import ru.otus.hw.domain.Question;
@@ -14,8 +15,9 @@ import java.util.List;
 
 
 @RequiredArgsConstructor
+@Component
 public class CsvQuestionDao implements QuestionDao {
-    private final TestFileNameProvider fileNameProvider;
+    private final TestFileNameProvider fileNameProvider; // подразумевается  @Autowired
 
     @Override
     public List<Question> findAll() {

@@ -1,15 +1,17 @@
 package ru.otus.hw.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import ru.otus.hw.config.TestConfig;
 import ru.otus.hw.domain.TestResult;
 
 @RequiredArgsConstructor
+@Service
 public class ResultServiceImpl implements ResultService {
 
-    private final TestConfig testConfig;
+    private final TestConfig testConfig; // подразумевается  @Autowired
 
-    private final IOService ioService;
+    private final IOService ioService;  // подразумевается  @Autowired
 
     @Override
     public void showResult(TestResult testResult) {
