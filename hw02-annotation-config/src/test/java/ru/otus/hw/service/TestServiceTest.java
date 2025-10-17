@@ -14,7 +14,9 @@ import ru.otus.hw.domain.Student;
 import java.util.List;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 
 public class TestServiceTest {
     private TestServiceImpl testService;

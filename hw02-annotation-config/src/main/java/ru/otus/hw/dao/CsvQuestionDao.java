@@ -33,7 +33,7 @@ public class CsvQuestionDao implements QuestionDao {
             if (questionDTOList.isEmpty()) {
                 throw new QuestionReadException("Questions is empty");
             }
-            return csvReader.parse().stream().map(QuestionDto::toDomainObject).toList();
+            return questionDTOList.stream().map(QuestionDto::toDomainObject).toList();
         } catch (Exception e) {
             throw new QuestionReadException("Something wrong in questions read");
         }
