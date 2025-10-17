@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class TestRunnerServiceImpl implements TestRunnerService {
 
-    private final TestService testService;        // подразумевается  @Autowired
+    private final TestService testService;
 
-    private final StudentService studentService; // подразумевается  @Autowired
+    private final StudentService studentService;
 
-    private final ResultService resultService;   // подразумевается  @Autowired
+    private final ResultService resultService;
 
     @Override
     public void run() {

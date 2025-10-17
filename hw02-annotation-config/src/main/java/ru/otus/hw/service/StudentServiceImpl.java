@@ -8,7 +8,7 @@ import ru.otus.hw.domain.Student;
 @Service
 public class StudentServiceImpl implements StudentService {
 
-    private final IOService ioService; // подразумевается  @Autowired
+    private final IOService ioService;
 
     @Override
     public Student determineCurrentStudent() {

@@ -4,43 +4,39 @@ package ru.otus.hw.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import ru.otus.hw.dao.CsvQuestionDao;
 import ru.otus.hw.dao.QuestionDao;
 import ru.otus.hw.domain.Answer;
 import ru.otus.hw.domain.Question;
+import ru.otus.hw.domain.Student;
 
 import java.util.List;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.*;
+
 public class TestServiceTest {
     private TestServiceImpl testService;
     private IOService ioService;
     private QuestionDao csvQuestionDao;
-    private QuestionConverter questionConverter;
+    private QuestionService questionService;
+
     private InOrder inOrder;
 
     @BeforeEach
     void setUp() {
         ioService = mock(StreamsIOService.class);
         csvQuestionDao = mock(CsvQuestionDao.class);
-        QuestionToStringConverter realConverter = new QuestionToStringConverter();
-        questionConverter = spy(realConverter);
-        inOrder = inOrder(ioService, csvQuestionDao, questionConverter);
-        testService = new TestServiceImpl(ioService, csvQuestionDao, questionConverter);
+        questionService = mock(SimpleQuestionService.class);
+        inOrder = inOrder(ioService, csvQuestionDao, questionService);
+        testService = new TestServiceImpl(ioService, csvQuestionDao, questionService);
     }
 
 
     @DisplayName("Should print")
     @Test
-    void testExecuteTest() {
+    void testExecuteTestFor() {
 
         Question question1 = new Question("Is there life on Mars?", List.of(new Answer("Science doesn't know this yet", true),
                 new Answer("Certainly. The red UFO is from Mars. And green is from Venus", false),
@@ -56,23 +52,18 @@ public class TestServiceTest {
         List<Question> expected = List.of(question1, question2, question3);
         given(csvQuestionDao.findAll()).willReturn(expected);
 
-        testService.executeTest();
+        Student student = new Student("Kurt", "Cobain");
+        testService.executeTestFor(student);
 
-        var captor = ArgumentCaptor.forClass(Question.class);
+
 
         inOrder.verify(ioService, times(1)).printLine("");
         inOrder.verify(ioService, times(1)).printFormattedLine("Please answer the questions below%n");
         inOrder.verify(csvQuestionDao , times(1)).findAll();
-        inOrder.verify(questionConverter , times(expected.size())).convertQuestionToString(captor.capture());
-
-        List<Question> questionConverterArguments = captor.getAllValues();
-        assertThat(questionConverterArguments).isEqualTo(expected); //checking that the convertQuestionToString() method received  unchanged arguments
-
-        for (Question questionConverterArgument : questionConverterArguments) {
-            String convertResult = questionConverter.convertQuestionToString(questionConverterArgument);
-            assertTrue(convertResult.matches(".*\\?\n(\\d{1,2}\\. .*\n){1,10}"));
+        for (Question question: expected) {
+            inOrder.verify(questionService , times(1)).askQuestion(question);
+            inOrder.verify(questionService , times(1)).checkAnswer(question);
         }
-
 
     }
 
