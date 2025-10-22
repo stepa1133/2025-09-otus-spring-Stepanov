@@ -1,13 +1,13 @@
 package ru.otus.hw.service;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import ru.otus.hw.domain.Answer;
 import ru.otus.hw.domain.Question;
 
 import java.util.stream.IntStream;
 
 
-@Service
+@Component
 public class QuestionToStringConverter implements QuestionConverter {
     @Override
     public String convertQuestion(Question question) {

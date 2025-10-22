@@ -2,7 +2,6 @@ package ru.otus.hw.service;
 
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import ru.otus.hw.dao.CsvQuestionDao;
@@ -10,9 +9,12 @@ import ru.otus.hw.dao.QuestionDao;
 import ru.otus.hw.domain.Answer;
 import ru.otus.hw.domain.Question;
 import ru.otus.hw.domain.Student;
+import ru.otus.hw.domain.TestResult;
 
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -36,7 +38,6 @@ public class TestServiceTest {
     }
 
 
-    @DisplayName("Should print")
     @Test
     void testExecuteTestFor() {
 
@@ -53,10 +54,10 @@ public class TestServiceTest {
 
         List<Question> expected = List.of(question1, question2, question3);
         given(csvQuestionDao.findAll()).willReturn(expected);
+        given(questionService.checkAnswer(any())).willReturn(true);
 
         Student student = new Student("Kurt", "Cobain");
-        testService.executeTestFor(student);
-
+        TestResult result = testService.executeTestFor(student);
 
 
         inOrder.verify(ioService, times(1)).printLine("");
@@ -66,6 +67,10 @@ public class TestServiceTest {
             inOrder.verify(questionService , times(1)).askQuestion(question);
             inOrder.verify(questionService , times(1)).checkAnswer(question);
         }
+
+        assertThat(result.getStudent().getFullName()).isEqualTo("Kurt Cobain");
+        assertThat(result.getAnsweredQuestions().size()).isEqualTo(3);
+        assertThat(result.getRightAnswersCount()).isEqualTo(3);
 
     }
 
