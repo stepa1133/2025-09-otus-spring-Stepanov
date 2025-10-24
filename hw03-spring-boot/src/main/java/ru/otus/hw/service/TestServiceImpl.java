@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.otus.hw.dao.QuestionDao;
 import ru.otus.hw.domain.Student;
 import ru.otus.hw.domain.TestResult;
+import ru.otus.hw.exceptions.QuestionReadException;
 
 @Service
 @RequiredArgsConstructor
@@ -14,20 +15,26 @@ public class TestServiceImpl implements TestService {
 
     private final QuestionDao questionDao;
 
+    private final QuestionService questionService;
+
+
     @Override
     public TestResult executeTestFor(Student student) {
-        ioService.printLine("");
-        ioService.printLineLocalized("TestService.answer.the.questions");
-        ioService.printLine("");
+        try {
+            ioService.printLine("");
+            ioService.printFormattedLine("Please answer the questions below%n");
+            var questions = questionDao.findAll();
+            var testResult = new TestResult(student);
 
-        var questions = questionDao.findAll();
-        var testResult = new TestResult(student);
-
-        for (var question: questions) {
-            var isAnswerValid = false; // Задать вопрос, получить ответ
-            testResult.applyAnswer(question, isAnswerValid);
+            for (var question: questions) {
+                questionService.askQuestion(question);
+                var isAnswerValid = questionService.checkAnswer(question);
+                testResult.applyAnswer(question, isAnswerValid);
+            }
+            return testResult;
+        } catch (QuestionReadException e) {
+            return null;
         }
-        return testResult;
     }
 
 }
