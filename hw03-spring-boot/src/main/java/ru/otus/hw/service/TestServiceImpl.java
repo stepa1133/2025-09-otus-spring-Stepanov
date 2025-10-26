@@ -22,7 +22,7 @@ public class TestServiceImpl implements TestService {
     public TestResult executeTestFor(Student student) {
         try {
             ioService.printLine("");
-            ioService.printFormattedLine("Please answer the questions below%n");
+            ioService.printFormattedLineLocalized("TestService.answer.the.questions");
             var questions = questionDao.findAll();
             var testResult = new TestResult(student);
 

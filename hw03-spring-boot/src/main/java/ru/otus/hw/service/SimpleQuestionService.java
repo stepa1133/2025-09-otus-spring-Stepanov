@@ -4,12 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.otus.hw.domain.Question;
 
-
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class SimpleQuestionService implements QuestionService {
 
-    private final IOService ioService;
+    private final LocalizedIOService ioService;
 
     private final QuestionConverter questionConverter;
 
@@ -21,10 +20,8 @@ public class SimpleQuestionService implements QuestionService {
 
     @Override
     public boolean checkAnswer(Question question) {
-        String answerPrompt = "Please input your answer number:";
-        String answerErrMessage = String.format("You have to choose a number from 0 to %d", question.answers().size());
-        int answNum = ioService.readIntForRangeWithPrompt(1, question.answers().size(), answerPrompt, answerErrMessage);
+        int answNum = ioService.readIntForRangeWithPromptLocalized(1, question.answers().size(),
+                            "QuestionService.ask.answer", "QuestionService.ask.answer.error");
         return question.answers().get(answNum - 1).isCorrect();
-
     }
 }

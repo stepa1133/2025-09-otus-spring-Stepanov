@@ -1,0 +1,26 @@
+${AnsiColor.BRIGHT_YELLOW}${AnsiStyle.BOLD}
+
+                                                            bbbbbbbb
+        CCCCCCCCCCCCChhhhhhh                                b::::::b                                                                    kkkkkkkk
+     CCC::::::::::::Ch:::::h                                b::::::b                                                                    k::::::k
+   CC:::::::::::::::Ch:::::h                                b::::::b                                                                    k::::::k
+  C:::::CCCCCCCC::::Ch:::::h                                 b:::::b                                                                    k::::::k
+ C:::::C       CCCCCC h::::h hhhhh           eeeeeeeeeeee    b:::::bbbbbbbbb    uuuuuu    uuuuuu rrrrr   rrrrrrrrr       eeeeeeeeeeee    k:::::k    kkkkkkk
+C:::::C               h::::hh:::::hhh      ee::::::::::::ee  b::::::::::::::bb  u::::u    u::::u r::::rrr:::::::::r    ee::::::::::::ee  k:::::k   k:::::k
+C:::::C               h::::::::::::::hh   e::::::eeeee:::::eeb::::::::::::::::b u::::u    u::::u r:::::::::::::::::r  e::::::eeeee:::::eek:::::k  k:::::k
+C:::::C               h:::::::hhh::::::h e::::::e     e:::::eb:::::bbbbb:::::::bu::::u    u::::u rr::::::rrrrr::::::re::::::e     e:::::ek:::::k k:::::k
+C:::::C               h::::::h   h::::::he:::::::eeeee::::::eb:::::b    b::::::bu::::u    u::::u  r:::::r     r:::::re:::::::eeeee::::::ek::::::k:::::k
+C:::::C               h:::::h     h:::::he:::::::::::::::::e b:::::b     b:::::bu::::u    u::::u  r:::::r     rrrrrrre:::::::::::::::::e k:::::::::::k
+C:::::C               h:::::h     h:::::he::::::eeeeeeeeeee  b:::::b     b:::::bu::::u    u::::u  r:::::r            e::::::eeeeeeeeeee  k:::::::::::k
+ C:::::C       CCCCCC h:::::h     h:::::he:::::::e           b:::::b     b:::::bu:::::uuuu:::::u  r:::::r            e:::::::e           k::::::k:::::k
+  C:::::CCCCCCCC::::C h:::::h     h:::::he::::::::e          b:::::bbbbbb::::::bu:::::::::::::::uur:::::r            e::::::::e         k::::::k k:::::k
+   CC:::::::::::::::C h:::::h     h:::::h e::::::::eeeeeeee  b::::::::::::::::b  u:::::::::::::::ur:::::r             e::::::::eeeeeeee k::::::k  k:::::k
+     CCC::::::::::::C h:::::h     h:::::h  ee:::::::::::::e  b:::::::::::::::b    uu::::::::uu:::ur:::::r              ee:::::::::::::e k::::::k   k:::::k
+        CCCCCCCCCCCCC hhhhhhh     hhhhhhh    eeeeeeeeeeeeee  bbbbbbbbbbbbbbbb       uuuuuuuu  uuuurrrrrrr                eeeeeeeeeeeeee kkkkkkkk    kkkkkkk
+
+
+
+
+
+
+
