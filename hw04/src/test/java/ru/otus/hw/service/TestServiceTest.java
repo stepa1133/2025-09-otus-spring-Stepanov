@@ -1,9 +1,11 @@
 package ru.otus.hw.service;
 
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import ru.otus.hw.dao.CsvQuestionDao;
 import ru.otus.hw.dao.QuestionDao;
 import ru.otus.hw.domain.Answer;
@@ -17,25 +19,21 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 
+@SpringBootTest(classes = TestServiceImpl.class)
 public class TestServiceTest {
-    private TestServiceImpl testService;
+    @MockitoBean
     private LocalizedIOService ioService;
+
+    @MockitoBean
     private QuestionDao csvQuestionDao;
+
+    @MockitoBean
     private QuestionService questionService;
 
-    private InOrder inOrder;
-
-    @BeforeEach
-    void setUp() {
-        ioService = mock(LocalizedIOService.class);
-        csvQuestionDao = mock(CsvQuestionDao.class);
-        questionService = mock(SimpleQuestionService.class);
-        inOrder = inOrder(ioService, csvQuestionDao, questionService);
-        testService = new TestServiceImpl(ioService, csvQuestionDao, questionService);
-    }
+    @Autowired
+    private TestService testService;
 
 
     @Test
@@ -59,7 +57,7 @@ public class TestServiceTest {
         Student student = new Student("Kurt", "Cobain");
         TestResult result = testService.executeTestFor(student);
 
-
+        InOrder inOrder = inOrder(ioService, csvQuestionDao, questionService);
         inOrder.verify(ioService, times(1)).printLine("");
         inOrder.verify(ioService, times(1)).printFormattedLineLocalized("TestService.answer.the.questions");
         inOrder.verify(csvQuestionDao , times(1)).findAll();
@@ -71,7 +69,6 @@ public class TestServiceTest {
         assertThat(result.getStudent().getFullName()).isEqualTo("Kurt Cobain");
         assertThat(result.getAnsweredQuestions().size()).isEqualTo(3);
         assertThat(result.getRightAnswersCount()).isEqualTo(3);
-
     }
 
 }

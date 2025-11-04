@@ -1,9 +1,13 @@
 package ru.otus.hw.integration;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import ru.otus.hw.config.TestFileNameProvider;
 import ru.otus.hw.dao.CsvQuestionDao;
+import ru.otus.hw.dao.QuestionDao;
 import ru.otus.hw.domain.Answer;
 import ru.otus.hw.domain.Question;
 import ru.otus.hw.exceptions.QuestionReadException;
@@ -16,19 +20,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 
+@SpringBootTest
+@ContextConfiguration(classes = CsvQuestionDao.class)
 public class QuestionDaoIntegrationTest {
 
 
-    private CsvQuestionDao questionDao;
+    @Autowired
+    private QuestionDao questionDao;
+    @MockitoBean
     private TestFileNameProvider fileNameProvider;
-
-    @BeforeEach
-    void setUp() {
-        fileNameProvider = mock();
-        questionDao = new CsvQuestionDao(fileNameProvider);
-    }
 
     @Test
     void shouldContainCorrectData() {

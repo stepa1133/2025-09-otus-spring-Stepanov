@@ -1,22 +1,30 @@
 package ru.otus.hw.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import ru.otus.hw.domain.Answer;
 import ru.otus.hw.domain.Question;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+@SpringBootTest
 public class QuestionConverterTest {
-    QuestionConverter questionConverter;
-    @BeforeEach
-    void setUp() {
-        questionConverter = mock(QuestionToStringConverter.class);
+
+    @Configuration
+    static class TestConfig {
+        @Bean
+        QuestionConverter questionConverter() {
+            return new QuestionToStringConverter();
+        }
     }
+
+    @Autowired
+    QuestionConverter questionConverter;
 
     @Test
     void testConvertQuestion() {
@@ -34,7 +42,6 @@ public class QuestionConverterTest {
 
 
         questions.forEach(question -> {
-            when(questionConverter.convertQuestion(question)).thenCallRealMethod();
             String convertResult = questionConverter.convertQuestion(question);
             assertTrue(convertResult.matches(".*\\?\n(\\d{1,2}\\. .*\n){1,10}"));
         });
