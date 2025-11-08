@@ -1,8 +1,8 @@
 insert into authors(full_name)
-values ('Author_1'), ('Author_2'), ('Author_3');
+values ('Jack London'), ('Steven King'), ('Chuck Palahniuk');
 
 insert into genres(name)
-values ('Genre_1'), ('Genre_2'), ('Genre_3');
+values ('Adventure'), ('Scary'), ('Thriller');
 
 insert into books(title, author_id, genre_id)
-values ('BookTitle_1', 1, 1), ('BookTitle_2', 2, 2), ('BookTitle_3', 3, 3);
+values ('Sea wolf', 1, 1), ('IT', 2, 2), ('Fight Club', 3, 3), ('The Green Mile', 2, 2);
