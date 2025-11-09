@@ -25,10 +25,6 @@ class JdbcBookRepositoryTest {
     @Autowired
     private JdbcBookRepository repositoryJdbc;
 
-    @Autowired
-    private JdbcGenreRepository genreRepositoryJdbc;
-
-
     private List<Author> dbAuthors;
 
     private List<Genre> dbGenres;
@@ -40,16 +36,6 @@ class JdbcBookRepositoryTest {
         dbAuthors = getDbAuthors();
         dbGenres = getDbGenres();
         dbBooks = getDbBooks(dbAuthors, dbGenres);
-    }
-
-    @DisplayName("должен загружать список всех жанров")
-    @Test
-    void shouldReturnCorrectGenreList() {
-        var actualGenres = genreRepositoryJdbc.findAll();
-        var expectedGenres = dbGenres;
-
-        assertThat(actualGenres).containsExactlyElementsOf(expectedGenres);
-        actualGenres.forEach(System.out::println);
     }
 
     @DisplayName("должен загружать книгу по id")

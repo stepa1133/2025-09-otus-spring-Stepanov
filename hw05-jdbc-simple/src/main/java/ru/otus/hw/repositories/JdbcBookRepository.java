@@ -1,7 +1,6 @@
 package ru.otus.hw.repositories;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
@@ -14,7 +13,6 @@ import ru.otus.hw.models.Genre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,12 +21,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JdbcBookRepository implements BookRepository {
 
-    @Autowired
     private final NamedParameterJdbcOperations namedParameterJdbcOperations;
 
     @Override
     public Optional<Book> findById(long id) {
-       // String sql = "SELECT id, full_name FROM books WHERE id =:id";
         String sql = """
         SELECT books.id AS book_id, books.title, 
                authors.id AS author_id, authors.full_name, 
@@ -44,7 +40,6 @@ public class JdbcBookRepository implements BookRepository {
 
     @Override
     public List<Book> findAll() {
-//        String sql = "SELECT id, title, author_id, genre_id FROM books";
         String sql = """
         SELECT books.id AS book_id, books.title, 
                authors.id AS author_id, authors.full_name, 
@@ -79,22 +74,21 @@ public class JdbcBookRepository implements BookRepository {
 
         String sql = "INSERT INTO books (title, author_id, genre_id) VALUES (:title, :author_id, :genre_id)";
         namedParameterJdbcOperations.update(sql, params, keyHolder, new String[]{"id"});
-        //noinspection DataFlowIssue todo
+        //noinspection DataFlowIssue
         book.setId(keyHolder.getKeyAs(Long.class));
         return book;
     }
 
     private Book update(Book book) {
-        // Выбросить EntityNotFoundException если не обновлено ни одной записи в БД
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValues(Map.of( "id", book.getId(),
+        params.addValues(Map.of("id", book.getId(),
                 "title", book.getTitle(),
                 "author_id", book.getAuthor().getId(),
                 "genre_id", book.getGenre().getId()));
         String sql = "UPDATE books SET title = :title, author_id = :author_id, genre_id = :genre_id WHERE id = :id";
         int rowsUpdated = namedParameterJdbcOperations.update(sql, params);
         if (rowsUpdated == 0) {
-            throw new EntityNotFoundException("Book with id=" + book.getId() + " not found");//todo
+            throw new EntityNotFoundException("Book with id=" + book.getId() + " not found");
         }
         return book;
     }
