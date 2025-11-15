@@ -3,6 +3,8 @@ package ru.otus.hw.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.otus.hw.converters.dto.CommentDtoConverter;
+import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
@@ -11,6 +13,7 @@ import ru.otus.hw.repositories.CommentRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @RequiredArgsConstructor
@@ -22,25 +25,31 @@ public class CommentServiceImpl implements CommentService {
 
     private final BookRepository bookRepository;
 
+    private final CommentDtoConverter commentDtoConverter;
+
     @Override
-    public Optional<Comment> findById(long id) {
-        return commentRepository.findById(id);
+    public Optional<CommentDto> findById(long id) {
+        Comment comment = commentRepository.findById(id).get();
+        return Optional.ofNullable(commentDtoConverter.toDto(comment));
     }
 
     @Override
-    public List<Comment> findAllBookComments(long bookId) {
-        return commentRepository.findAllBookComments(bookId);
+    public List<CommentDto> findAllBookComments(long bookId) {
+        return commentRepository.findAllBookComments(bookId)
+                .stream()
+                .map(commentDtoConverter::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public Comment insert(long bookId, String commentary) {
+    public CommentDto insert(long bookId, String commentary) {
         return save(0, bookId, commentary);
     }
 
     @Override
     @Transactional
-    public Comment update(long id, long bookId, String commentary) {
+    public CommentDto update(long id, long bookId, String commentary) {
         return save(id, bookId, commentary);
     }
 
@@ -56,11 +65,11 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.deleteAllCommentsByBookId(bookId);
     }
 
-    private Comment save(long id, long bookId, String commentary) {
+    private CommentDto save(long id, long bookId, String commentary) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(bookId)));
         var comment = new Comment(id, book, commentary);
-        return commentRepository.save(comment);
+        return commentDtoConverter.toDto(commentRepository.save(comment));
     }
 
 }
