@@ -22,7 +22,12 @@ public class JdbcBookRepository implements BookRepository {
 
     @Override
     public Optional<Book> findById(long id) {
-        return Optional.ofNullable(em.find(Book.class, id));
+//        return Optional.ofNullable(em.find(Book.class, id));
+        EntityGraph<?> entityGraph = em.getEntityGraph("book-with-author-and-genre-entity-graph");
+        TypedQuery<Book> query = em.createQuery("select b from Book b where b.id = :id", Book.class);
+        query.setParameter("id", id);
+        query.setHint(FETCH.getKey(), entityGraph);
+        return query.getResultStream().findFirst();
     }
 
     @Override
