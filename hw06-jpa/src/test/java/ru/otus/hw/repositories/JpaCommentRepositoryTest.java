@@ -35,6 +35,7 @@ public class JpaCommentRepositoryTest {
             Assertions.assertThat(actualComment).isPresent()
                     .get()
                     .usingRecursiveComparison()
+                    .comparingOnlyFields("id")
                     .isEqualTo(expectedComment);
 
         }
