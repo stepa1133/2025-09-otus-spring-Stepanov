@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Service
 public class CommentServiceImpl implements CommentService {
 
@@ -28,12 +27,14 @@ public class CommentServiceImpl implements CommentService {
     private final CommentDtoConverter commentDtoConverter;
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<CommentDto> findById(long id) {
         Comment comment = commentRepository.findById(id).get();
         return Optional.ofNullable(commentDtoConverter.toDto(comment));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CommentDto> findAllBookComments(long bookId) {
         return commentRepository.findAllBookComments(bookId)
                 .stream()

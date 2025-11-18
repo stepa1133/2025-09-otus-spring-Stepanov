@@ -14,20 +14,24 @@ import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 @Entity
 @Table(name = "books")
 @NamedEntityGraph(
-        name = "book-with-author-and-genre-entity-graph",
+        name = "book-with-author-comments-genre-entity-graph",
         attributeNodes = {
                 @NamedAttributeNode("author"),
+                @NamedAttributeNode("comments"),
                 @NamedAttributeNode("genre")
         }
 )
@@ -48,5 +52,6 @@ public class Book {
     private Genre genre;
 
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Setter
     private List<Comment> comments;
 }

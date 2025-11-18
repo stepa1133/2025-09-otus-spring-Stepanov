@@ -1,6 +1,6 @@
 package ru.otus.hw.dto;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import ru.otus.hw.models.Book;
 
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-@Data
+@Getter
 public class BookDto {
 
     private final long id;

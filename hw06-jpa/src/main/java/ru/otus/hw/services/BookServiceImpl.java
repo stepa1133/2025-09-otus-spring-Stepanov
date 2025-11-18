@@ -18,7 +18,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Service
 public class BookServiceImpl implements BookService {
     private final AuthorRepository authorRepository;
@@ -35,12 +34,14 @@ public class BookServiceImpl implements BookService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<BookDto> findById(long id) {
         Book book = bookRepository.findById(id).get();
         return Optional.ofNullable(bookDtoConverter.toDto(book));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookDto> findAll() {
         return bookRepository.findAll()
                 .stream()
