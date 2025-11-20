@@ -38,7 +38,6 @@ public class JpaGenreRepositoryTest {
         var expectedGenres = getDbGenres();
 
         assertThat(actualGenres).containsExactlyElementsOf(expectedGenres);
-        actualGenres.forEach(System.out::println);
     }
 
     @DisplayName("должен загружать жанр по id")

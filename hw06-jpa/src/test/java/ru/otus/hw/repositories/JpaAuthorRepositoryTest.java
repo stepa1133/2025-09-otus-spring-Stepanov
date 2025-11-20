@@ -43,7 +43,6 @@ public class JpaAuthorRepositoryTest {
             Assertions.assertThat(actualAuthor).isPresent()
                     .get()
                     .usingRecursiveComparison()
-                    // .comparingOnlyFields("id")
                     .isEqualTo(expectedAuthor);
         }
     }

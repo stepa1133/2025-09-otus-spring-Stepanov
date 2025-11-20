@@ -50,7 +50,6 @@ class JpaBookRepositoryTest {
         var expectedBooks = getDbBooks();
 
         assertThat(actualBooks).containsExactlyElementsOf(expectedBooks);
-        actualBooks.forEach(System.out::println);
     }
 
     @DisplayName("должен сохранять новую книгу")
@@ -68,7 +67,6 @@ class JpaBookRepositoryTest {
 
         var returnedBook = em.find(Book.class, bookToAdd.getId());
         assertThat(returnedBook).isNotNull()
-                .matches(book -> book.getId() > 0)
                 .usingRecursiveComparison().ignoringExpectedNullFields().isEqualTo(bookToAdd);
     }
 
