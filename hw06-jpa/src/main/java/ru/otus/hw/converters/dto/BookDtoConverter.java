@@ -33,4 +33,14 @@ public class BookDtoConverter {
         GenreDto genreDto = genreDtoConverter.toDto(book.getGenre());
         return new BookDto(book.getId(), book.getTitle(), authorDto, genreDto, comments);
     }
+
+    public BookDto toDtoWithoutComments(Book book) {
+
+        if (book == null) {
+            return null;
+        }
+        AuthorDto authorDto = authorDtoConverter.toDto(book.getAuthor());
+        GenreDto genreDto = genreDtoConverter.toDto(book.getGenre());
+        return new BookDto(book.getId(), book.getTitle(), authorDto, genreDto, null);
+    }
 }

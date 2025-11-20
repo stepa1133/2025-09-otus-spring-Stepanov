@@ -80,13 +80,7 @@ public class BookServiceIntegrationTest {
         ).doesNotThrowAnyException();
     }
 
-    @DisplayName("Не должен выбрасывать исключния при удалении книги")
-    @Test
-    void shouldDoNotThrowException5() {
-        assertThatCode(
-                () -> bookService.deleteById(1)
-        ).doesNotThrowAnyException();
-    }
+
 
     @DisplayName("Должен найти книгу по id")
     @Test
@@ -100,6 +94,7 @@ public class BookServiceIntegrationTest {
                 .isEqualTo(1L);
     }
 
+    @Transactional
     @DisplayName("Должен выгружать список всех книг")
     @Test
     void shouldReturnCorrectBooksList() {
@@ -113,6 +108,7 @@ public class BookServiceIntegrationTest {
 
     @DisplayName("должен сохранять новую книгу")
     @Test
+    @Transactional
     void shouldSaveNewBook() {
         bookService.insert("Как учить студентов и не поехать кукухой", 1, 1);
         Optional<BookDto> book = bookService.findById(4);
@@ -148,6 +144,7 @@ public class BookServiceIntegrationTest {
 
     @DisplayName("должен удалять книгу")
     @Test
+    @Transactional
     void shouldDeleteBook() {
         Optional<BookDto> existingBook = bookService.findById(1);
         assertThat(existingBook).isPresent();
