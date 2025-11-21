@@ -2,17 +2,12 @@ package ru.otus.hw.repositories;
 
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 
 import java.util.List;
@@ -22,11 +17,10 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @DisplayName("Репозиторий на основе JPA для работы с жанрами")
 @DataJpaTest
-@Import({JpaGenreRepository.class})
 public class JpaGenreRepositoryTest {
 
     @Autowired
-    private JpaGenreRepository repositoryJpa;
+    private GenreRepository repository;
 
     @Autowired
     private TestEntityManager em;
@@ -34,7 +28,7 @@ public class JpaGenreRepositoryTest {
     @DisplayName("должен загружать список всех жанров")
     @Test
     void shouldReturnCorrectGenreList() {
-        var actualGenres = repositoryJpa.findAll();
+        var actualGenres = repository.findAll();
         var expectedGenres = getDbGenres();
 
         assertThat(actualGenres).containsExactlyElementsOf(expectedGenres);
@@ -45,7 +39,7 @@ public class JpaGenreRepositoryTest {
     void shouldReturnCorrectBookById() {
         var expectedGenres = getDbGenres();
         for (Genre expectedGenre: expectedGenres) {
-            var actualGenre = repositoryJpa.findById(expectedGenre.getId());
+            var actualGenre = repository.findById(expectedGenre.getId());
             Assertions.assertThat(actualGenre).isPresent()
                     .get()
                     .usingRecursiveComparison()

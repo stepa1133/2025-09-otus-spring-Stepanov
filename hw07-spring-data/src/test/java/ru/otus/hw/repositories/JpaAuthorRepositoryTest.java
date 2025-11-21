@@ -15,11 +15,10 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @DisplayName("Репозиторий на основе JPA для работы с авторами")
 @DataJpaTest
-@Import({JpaAuthorRepository.class})
 public class JpaAuthorRepositoryTest {
 
     @Autowired
-    private JpaAuthorRepository repositoryJpa;
+    private AuthorRepository repository;
 
     @Autowired
     private TestEntityManager em;
@@ -27,7 +26,7 @@ public class JpaAuthorRepositoryTest {
     @DisplayName("должен загружать список всех авторов")
     @Test
     void shouldReturnCorrectAuthorList() {
-        var actualAuthors = repositoryJpa.findAll();
+        var actualAuthors = repository.findAll();
         var expectedAuthors = getDbAuthors();
 
         assertThat(actualAuthors).containsExactlyElementsOf(expectedAuthors);
@@ -38,7 +37,7 @@ public class JpaAuthorRepositoryTest {
     void shouldReturnCorrectAuthor() {
         var expectedAuthors = getDbAuthors();
         for (var expectedAuthor: expectedAuthors) {
-            var actualAuthor = repositoryJpa.findById(expectedAuthor.getId());
+            var actualAuthor = repository.findById(expectedAuthor.getId());
             Assertions.assertThat(actualAuthor).isPresent()
                     .get()
                     .usingRecursiveComparison()

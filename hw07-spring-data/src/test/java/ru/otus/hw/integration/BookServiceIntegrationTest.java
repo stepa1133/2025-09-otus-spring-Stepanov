@@ -91,7 +91,6 @@ public class BookServiceIntegrationTest {
                 .isEqualTo(1L);
     }
 
-    @Transactional
     @DisplayName("Должен выгружать список всех книг")
     @Test
     void shouldReturnCorrectBooksList() {

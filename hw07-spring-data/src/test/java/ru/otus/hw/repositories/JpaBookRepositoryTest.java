@@ -18,11 +18,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Репозиторий на основе JPA + Hibernate для работы с книгами")
 @DataJpaTest
-@Import({JpaBookRepository.class})
 class JpaBookRepositoryTest {
 
     @Autowired
-    private JpaBookRepository repositoryJpa;
+    private BookRepository repository;
 
     @Autowired
     private TestEntityManager em;
@@ -33,7 +32,7 @@ class JpaBookRepositoryTest {
     void shouldReturnCorrectBookById() {
         var expectedBooks = getDbBooks();
         for (Book expectedBook : expectedBooks) {
-            var actualBook = repositoryJpa.findById(expectedBook.getId());
+            var actualBook = repository.findById(expectedBook.getId());
 
             assertThat(actualBook).isPresent()
                     .get()
@@ -46,7 +45,7 @@ class JpaBookRepositoryTest {
     @DisplayName("должен загружать список всех книг")
     @Test
     void shouldReturnCorrectBooksList() {
-        var actualBooks = repositoryJpa.findAll();
+        var actualBooks = repository.findAll();
         var expectedBooks = getDbBooks();
 
         assertThat(actualBooks).containsExactlyElementsOf(expectedBooks);
@@ -60,7 +59,7 @@ class JpaBookRepositoryTest {
         var bookToAdd = new Book(0, "BookTitle_10500", author, genre, null);
         var comment = new Comment(0, bookToAdd, "Не надо это читать");
         bookToAdd.setComments(List.of(comment));
-        repositoryJpa.save(bookToAdd);
+        repository.save(bookToAdd);
 
         em.flush();
         em.clear();
@@ -78,7 +77,7 @@ class JpaBookRepositoryTest {
         var bookToUpdate = em.find(Book.class, 1L);
         bookToUpdate.setTitle("Измененная книга");
 
-        repositoryJpa.save(bookToUpdate);
+        repository.save(bookToUpdate);
 
         em.flush();
         em.clear();
@@ -94,7 +93,7 @@ class JpaBookRepositoryTest {
         var bookIdToDelete = bookToDelete.getId();
         em.clear();
 
-        repositoryJpa.deleteById(bookIdToDelete);
+        repository.deleteById(bookIdToDelete);
 
         var shouldBeNull = em.find(Book.class, bookIdToDelete);
         assertThat(shouldBeNull).isEqualTo(null);
