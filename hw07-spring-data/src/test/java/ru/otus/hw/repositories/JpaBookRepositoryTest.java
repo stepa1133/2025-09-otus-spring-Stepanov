@@ -31,6 +31,8 @@ class JpaBookRepositoryTest {
     @Test
     void shouldReturnCorrectBookById() {
         var expectedBooks = getDbBooks();
+        em.clear();
+
         for (Book expectedBook : expectedBooks) {
             var actualBook = repository.findById(expectedBook.getId());
 
@@ -47,6 +49,7 @@ class JpaBookRepositoryTest {
     void shouldReturnCorrectBooksList() {
         var actualBooks = repository.findAll();
         var expectedBooks = getDbBooks();
+        em.clear();
 
         assertThat(actualBooks).containsExactlyElementsOf(expectedBooks);
     }
@@ -104,7 +107,6 @@ class JpaBookRepositoryTest {
                 .map(id -> em.find(Book.class, id))
                 .toList();
 
-        em.clear();
         return  books;
     }
 }

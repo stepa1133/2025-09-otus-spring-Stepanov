@@ -28,6 +28,7 @@ public class JpaAuthorRepositoryTest {
     void shouldReturnCorrectAuthorList() {
         var actualAuthors = repository.findAll();
         var expectedAuthors = getDbAuthors();
+        em.clear();
 
         assertThat(actualAuthors).containsExactlyElementsOf(expectedAuthors);
     }
@@ -36,6 +37,7 @@ public class JpaAuthorRepositoryTest {
     @Test
     void shouldReturnCorrectAuthor() {
         var expectedAuthors = getDbAuthors();
+        em.clear();
         for (var expectedAuthor: expectedAuthors) {
             var actualAuthor = repository.findById(expectedAuthor.getId());
             Assertions.assertThat(actualAuthor).isPresent()
@@ -50,7 +52,6 @@ public class JpaAuthorRepositoryTest {
                 .map(id -> em.find(Author.class, id))
                 .toList();
 
-        em.clear();
         return authors;
     }
 }

@@ -28,6 +28,7 @@ public class JpaCommentRepositoryTest {
     @Test
     void shouldReturnCorrectAuthorList() {
         var expectedComments = getDbComments();
+        em.clear();
         for (var expectedComment: expectedComments) {
             var actualComment = repository.findById(expectedComment.getId());
             Assertions.assertThat(actualComment).isPresent()
@@ -44,7 +45,6 @@ public class JpaCommentRepositoryTest {
                 .map(id -> em.find(Comment.class, id))
                 .toList();
 
-        em.clear();
         return comments;
     }
 }

@@ -30,6 +30,7 @@ public class JpaGenreRepositoryTest {
     void shouldReturnCorrectGenreList() {
         var actualGenres = repository.findAll();
         var expectedGenres = getDbGenres();
+        em.clear();
 
         assertThat(actualGenres).containsExactlyElementsOf(expectedGenres);
     }
@@ -38,6 +39,8 @@ public class JpaGenreRepositoryTest {
     @Test
     void shouldReturnCorrectBookById() {
         var expectedGenres = getDbGenres();
+        em.clear();
+
         for (Genre expectedGenre: expectedGenres) {
             var actualGenre = repository.findById(expectedGenre.getId());
             Assertions.assertThat(actualGenre).isPresent()
@@ -55,7 +58,6 @@ public class JpaGenreRepositoryTest {
                 .map(id -> em.find(Genre.class, id))
                 .toList();
 
-        em.clear();
         return  genres;
     }
 
