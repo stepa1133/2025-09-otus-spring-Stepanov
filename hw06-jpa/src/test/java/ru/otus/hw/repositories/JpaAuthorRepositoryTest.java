@@ -31,7 +31,6 @@ public class JpaAuthorRepositoryTest {
         var expectedAuthors = getDbAuthors();
 
         assertThat(actualAuthors).containsExactlyElementsOf(expectedAuthors);
-        actualAuthors.forEach(System.out::println);
     }
 
     @DisplayName("должен загружать автора по итендификатору")

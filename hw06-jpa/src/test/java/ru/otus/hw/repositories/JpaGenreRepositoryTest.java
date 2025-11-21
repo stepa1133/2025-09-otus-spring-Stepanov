@@ -49,7 +49,6 @@ public class JpaGenreRepositoryTest {
             Assertions.assertThat(actualGenre).isPresent()
                     .get()
                     .usingRecursiveComparison()
-                   // .comparingOnlyFields("id")
                     .isEqualTo(expectedGenre);
         }
     }

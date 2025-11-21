@@ -23,10 +23,7 @@ public class BookDto {
     private final List<CommentDto> comments;
 
     public Book toDomain() {
-        List<Comment> comments = null;
-        if (this.comments != null) {
-            comments = this.comments.stream().map(CommentDto::toDomain).collect(Collectors.toList());
-        }
+        List<Comment> comments = this.comments.stream().map(CommentDto::toDomain).collect(Collectors.toList());
         return new Book(id, title, author.toDomain(), genre.toDomain(), comments);
     }
 }
