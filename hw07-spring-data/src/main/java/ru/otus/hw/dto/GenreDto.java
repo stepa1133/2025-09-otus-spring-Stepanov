@@ -1,15 +1,13 @@
 package ru.otus.hw.dto;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import ru.otus.hw.models.Genre;
 
 @RequiredArgsConstructor
+@Getter
 public class GenreDto {
     private final long id;
 
     private final String name;
 
-    public Genre toDomain() {
-        return new Genre(id, name);
-    }
 }

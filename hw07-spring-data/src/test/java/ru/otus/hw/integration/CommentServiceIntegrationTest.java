@@ -8,7 +8,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.converters.CommentConverter;
+import ru.otus.hw.converters.dto.CommentDtoConverter;
 import ru.otus.hw.dto.CommentDto;
+import ru.otus.hw.models.Comment;
 import ru.otus.hw.services.CommentService;
 import java.util.stream.Collectors;
 
@@ -27,6 +29,9 @@ public class CommentServiceIntegrationTest {
     @Autowired
     private CommentConverter commentConverter;
 
+    @Autowired
+    private CommentDtoConverter commentDtoConverter;
+
 
     @DisplayName("Не должен выбрасывать исключния при загрузке комментария по id")
     @Test
@@ -34,7 +39,7 @@ public class CommentServiceIntegrationTest {
         assertThatCode(
                 () -> {
                     commentService.findById(1)
-                            .map(CommentDto::toDomain)
+                            .map(commentDtoConverter::toDomain)
                             .map(commentConverter::commentToString)
                             .orElse("Comment with id %d not found".formatted(1));
                 }).doesNotThrowAnyException();
@@ -46,7 +51,7 @@ public class CommentServiceIntegrationTest {
         assertThatCode(
                 () -> {
                     commentService.findAllBookComments(1).stream()
-                            .map(CommentDto::toDomain)
+                            .map(commentDtoConverter::toDomain)
                             .map(commentConverter::commentToString)
                             .collect(Collectors.joining("," + System.lineSeparator()));
                 }).doesNotThrowAnyException();
@@ -57,7 +62,8 @@ public class CommentServiceIntegrationTest {
     void shouldDoNotThrowException3() {
         assertThatCode(
                 () -> {
-                    commentConverter.commentToString(commentService.insert(1, "kek").toDomain());
+                    Comment comment = commentDtoConverter.toDomain(commentService.insert(1, "kek"));
+                    commentConverter.commentToString(comment);
                 }).doesNotThrowAnyException();
     }
 

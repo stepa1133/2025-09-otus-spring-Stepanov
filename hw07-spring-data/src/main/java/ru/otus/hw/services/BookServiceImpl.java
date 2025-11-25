@@ -46,7 +46,7 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findAll()
                 .stream()
                 .map(bookDtoConverter::toDtoWithoutComments)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

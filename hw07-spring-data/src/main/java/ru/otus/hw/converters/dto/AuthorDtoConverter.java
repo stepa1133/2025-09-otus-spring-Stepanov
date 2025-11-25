@@ -12,4 +12,8 @@ public class AuthorDtoConverter {
     public AuthorDto toDto(Author author) {
         return new AuthorDto(author.getId(), author.getFullName());
     }
+
+    public Author toDomain(AuthorDto authorDto) {
+        return new Author(authorDto.getId(), authorDto.getFullName());
+    }
 }

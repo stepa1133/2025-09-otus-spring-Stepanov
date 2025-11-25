@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import ru.otus.hw.converters.AuthorConverter;
+import ru.otus.hw.converters.dto.AuthorDtoConverter;
 import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.services.AuthorService;
 
@@ -17,10 +18,12 @@ public class AuthorCommands {
 
     private final AuthorConverter authorConverter;
 
+    private final AuthorDtoConverter authorDtoConverter;
+
     @ShellMethod(value = "Find all authors", key = "aa")
     public String findAllAuthors() {
         return authorService.findAll().stream()
-                .map(AuthorDto::toDomain)
+                .map(authorDtoConverter::toDomain)
                 .map(authorConverter::authorToString)
                 .collect(Collectors.joining("," + System.lineSeparator()));
     }

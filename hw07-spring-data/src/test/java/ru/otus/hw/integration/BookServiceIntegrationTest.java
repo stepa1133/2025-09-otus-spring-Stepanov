@@ -8,6 +8,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.converters.BookConverter;
+import ru.otus.hw.converters.dto.BookDtoConverter;
 import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.services.BookServiceImpl;
@@ -33,13 +34,15 @@ public class BookServiceIntegrationTest {
     @Autowired
     private BookConverter bookConverter;
 
+    @Autowired
+    private BookDtoConverter bookDtoConverter;
 
     @DisplayName("Не должен выбрасывать исключния при загрузке всех книг")
     @Test
     void shouldDoNotThrowException1() {
         assertThatCode(
                 () -> bookService.findAll().stream()
-                        .map(BookDto::toDomain)
+                        .map(bookDtoConverter::toDomain)
                         .map(bookConverter::bookToString)
                         .collect(Collectors.joining("," + System.lineSeparator())))
         .doesNotThrowAnyException();
@@ -50,7 +53,7 @@ public class BookServiceIntegrationTest {
     void shouldDoNotThrowException2() {
         assertThatCode(
                 () -> bookService.findById(1)
-                        .map(BookDto::toDomain)
+                        .map(bookDtoConverter::toDomain)
                         .map(bookConverter::bookToString))
                 .doesNotThrowAnyException();
     }
@@ -61,7 +64,8 @@ public class BookServiceIntegrationTest {
         assertThatCode(
                 () -> {
                     var savedBook = bookService.insert("title", 1, 1);
-                    bookConverter.bookToString(savedBook.toDomain());
+                    Book book = bookDtoConverter.toDomain(savedBook);
+                    bookConverter.bookToString(book);
                 }
         ).doesNotThrowAnyException();
     }
@@ -72,7 +76,8 @@ public class BookServiceIntegrationTest {
         assertThatCode(
                 () -> {
                     var savedBook = bookService.update(1, "title", 1, 1);
-                    bookConverter.bookToString(savedBook.toDomain());
+                    Book book = bookDtoConverter.toDomain(savedBook);
+                    bookConverter.bookToString(book);
                 }
         ).doesNotThrowAnyException();
     }
@@ -124,7 +129,7 @@ public class BookServiceIntegrationTest {
                 .get()
                 .extracting(BookDto::getTitle)
                 .isNotEqualTo("Как учить студентов и не поехать кукухой");
-        Book book = bookDto.get().toDomain();
+        Book book = bookDtoConverter.toDomain(bookDto.get());
 
 
 
