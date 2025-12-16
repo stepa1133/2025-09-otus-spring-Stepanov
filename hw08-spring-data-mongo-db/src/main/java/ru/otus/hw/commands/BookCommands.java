@@ -5,7 +5,6 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import ru.otus.hw.converters.BookConverter;
 import ru.otus.hw.converters.dto.BookDtoConverter;
-import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.services.BookService;
 
 import java.util.stream.Collectors;
@@ -30,30 +29,30 @@ public class BookCommands {
     }
 
     @ShellMethod(value = "Find book by id", key = "bbid")
-    public String findBookById(long id) {
-        return bookService.findById(id)
+    public String findBookById(String id) {
+        return bookService.findById(String.valueOf(id))
                 .map(bookDtoConverter::toDomain)
                 .map(bookConverter::bookToString)
-                .orElse("Book with id %d not found".formatted(id));
+                .orElse("Book with id %s not found".formatted(id));
     }
 
     // bins newBook 1 1
     @ShellMethod(value = "Insert book", key = "bins")
-    public String insertBook(String title, long authorId, long genreId) {
+    public String insertBook(String title, String authorId, String genreId) {
         var savedBook = bookService.insert(title, authorId, genreId);
         return bookConverter.bookToString(bookDtoConverter.toDomain(savedBook));
     }
 
     // bupd 4 editedBook 3 2
     @ShellMethod(value = "Update book", key = "bupd")
-    public String updateBook(long id, String title, long authorId, long genreId) {
+    public String updateBook(String id, String title, String authorId, String genreId) {
         var savedBook = bookService.update(id, title, authorId, genreId);
         return bookConverter.bookToString(bookDtoConverter.toDomain(savedBook));
     }
 
     // bdel 4
     @ShellMethod(value = "Delete book by id", key = "bdel")
-    public void deleteBook(long id) {
+    public void deleteBook(String id) {
         bookService.deleteById(id);
     }
 }

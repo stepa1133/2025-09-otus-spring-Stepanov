@@ -5,7 +5,6 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import ru.otus.hw.converters.AuthorConverter;
 import ru.otus.hw.converters.dto.AuthorDtoConverter;
-import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.services.AuthorService;
 
 import java.util.stream.Collectors;

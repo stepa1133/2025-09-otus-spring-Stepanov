@@ -20,9 +20,8 @@ public class CommentCommands {
 
     private final CommentDtoConverter commentDtoConverter;
 
-    // find_comments 1
     @ShellMethod(value = "Find all comments by book id", key = "find_comments")
-    public String findAllBookComments(long bookId) {
+    public String findAllBookComments(String bookId) {
         return commentService.findAllBookComments(bookId).stream()
                 .map(commentDtoConverter::toDomain)
                 .map(commentConverter::commentToString)
@@ -31,16 +30,16 @@ public class CommentCommands {
 
     // find_comment 1
     @ShellMethod(value = "Find comment by id", key = "find_comment")
-    public String findCommentById(long id) {
+    public String findCommentById(String id) {
         return commentService.findById(id)
                 .map(commentDtoConverter::toDomain)
                 .map(commentConverter::commentToString)
-                .orElse("Comment with id %d not found".formatted(id));
+                .orElse("Comment with id %s not found".formatted(id));
     }
 
     // add_comment 1 "My favorite book"
     @ShellMethod(value = "Add comment", key = "add_comment")
-    public String insertComment(long bookId, String commentary) {
+    public String insertComment(String bookId, String commentary) {
         CommentDto commentDto = commentService.insert(bookId, commentary);
         Comment comment = commentDtoConverter.toDomain(commentDto);
         return commentConverter.commentToString(comment);
@@ -48,7 +47,7 @@ public class CommentCommands {
 
     // update_comment 2 4 "My second favorite book"
     @ShellMethod(value = "Update comment", key = "update_comment")
-    public String updateComment(long id, long bookId, String commentary) {
+    public String updateComment(String id, String bookId, String commentary) {
         CommentDto commentDto = commentService.update(id, bookId, commentary);
         Comment comment = commentDtoConverter.toDomain(commentDto);
         return commentConverter.commentToString(comment);
@@ -56,13 +55,13 @@ public class CommentCommands {
 
     // delete_comment 1
     @ShellMethod(value = "Delete book comment by id", key = "delete_comment")
-    public void deleteCommentsById(long id) {
+    public void deleteCommentsById(String id) {
         commentService.deleteById(id);
     }
 
     // delete_all_comments 1
     @ShellMethod(value = "Delete all book comments by id", key = "delete_all_comments")
-    public void deleteAllCommentsByBookId(long bookId) {
+    public void deleteAllCommentsByBookId(String bookId) {
         commentService.deleteAllCommentsByBookId(bookId);
     }
 

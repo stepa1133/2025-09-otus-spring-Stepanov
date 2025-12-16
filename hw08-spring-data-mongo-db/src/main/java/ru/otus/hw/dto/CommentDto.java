@@ -7,7 +7,7 @@ import ru.otus.hw.models.Book;
 @RequiredArgsConstructor
 @Getter
 public class CommentDto {
-    private final long id;
+    private final String id;
 
     private final Book book;
 

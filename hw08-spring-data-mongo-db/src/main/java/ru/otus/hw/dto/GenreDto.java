@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public class GenreDto {
-    private final long id;
+    private final String id;
 
     private final String name;
 

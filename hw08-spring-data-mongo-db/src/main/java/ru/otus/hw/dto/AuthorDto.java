@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public class AuthorDto {
 
-    private final long id;
+    private final String id;
 
     private final String fullName;
 
