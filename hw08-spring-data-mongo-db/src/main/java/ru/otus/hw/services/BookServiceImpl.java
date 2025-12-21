@@ -24,9 +24,6 @@ public class BookServiceImpl implements BookService {
 
     private final BookDtoConverter bookDtoConverter;
 
-
-
-
     @Override
     @Transactional(readOnly = true)
     public Optional<BookDto> findById(String id) {

@@ -11,8 +11,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import ru.otus.hw.converters.dto.AuthorDtoConverter;
 import ru.otus.hw.models.Author;
 
-import java.util.stream.Collectors;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -29,13 +27,11 @@ public class AuthorServiceImplTest {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-
-
     @DisplayName("Загружать всех авторов")
     @Test
     void findAllTest() {
         var authors = mongoTemplate.findAll(Author.class)
-                                         .stream().map(author->converter.toDto(author)).collect(Collectors.toList());
+                                         .stream().map(author->converter.toDto(author)).toList();
         var actualServiceAuthors = authorService.findAll();
 
         assertThat(authors)

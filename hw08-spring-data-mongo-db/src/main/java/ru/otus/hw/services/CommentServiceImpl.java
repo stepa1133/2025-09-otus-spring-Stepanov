@@ -13,7 +13,6 @@ import ru.otus.hw.repositories.CommentRepository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 @RequiredArgsConstructor
@@ -39,7 +38,7 @@ public class CommentServiceImpl implements CommentService {
         return commentRepository.findByBookId(bookId)
                 .stream()
                 .map(commentDtoConverter::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

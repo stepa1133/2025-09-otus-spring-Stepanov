@@ -4,18 +4,17 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import ru.otus.hw.converters.dto.CommentDtoConverter;
 import ru.otus.hw.models.Comment;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
-@ComponentScan(basePackages = "ru.otus.hw")
+@Import({CommentServiceImpl.class, CommentDtoConverter.class})
 public class CommentServiceImplTest {
 
     @Autowired
@@ -47,7 +46,7 @@ public class CommentServiceImplTest {
         query.addCriteria(Criteria.where("book.id").is("1"));
         var templateBooksComment = mongoTemplate.find(query, Comment.class);
         var serviceBookComments = commentService.findAllBookComments("1")
-                                                .stream().map(t->converter.toDomain(t)).collect(Collectors.toList());
+                                                .stream().map(t->converter.toDomain(t)).toList();
         assertThat(templateBooksComment)
                 .usingRecursiveComparison()
                 .ignoringFields("book")
@@ -85,7 +84,7 @@ public class CommentServiceImplTest {
     @Test
     void shouldDeleteAllBookComments() {
         var serviceBookComments = commentService.findAllBookComments("1")
-                .stream().map(t->converter.toDomain(t)).collect(Collectors.toList());
+                .stream().map(t->converter.toDomain(t)).toList();
         assertThat(serviceBookComments).isNotEmpty();
 
         commentService.deleteAllCommentsByBookId("1");
