@@ -105,6 +105,14 @@
                 <button type="submit" class="action-btn add-btn"
                         th:text="#{add-new-book-button}">Add New Book</button>
             </form>
+
+            <form th:action="@{/getAuthorsList}" method="get" class="action-form" style="display:inline-block; margin-left: 10px;">
+                <button type="submit" class="action-btn add-btn" th:text="Авторы">Authors</button>
+            </form>
+
+            <form th:action="@{/getGenresList}" method="get" class="action-form" style="display:inline-block; margin-left: 10px;">
+                <button type="submit" class="action-btn add-btn" th:text="Жанры">Genres</button>
+            </form>
         </td>
     </tr>
     </tfoot>
