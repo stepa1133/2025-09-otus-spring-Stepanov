@@ -46,7 +46,7 @@
 
 <!-- Book edition -->
 <!--<form id="edit-form" action="edit.html" th:action="@{/edit(id=${book.id})}" th:method="post" th:object="${book}">-->
-<form id="edit-form" action="bookEdit.html" th:action="@{/edit}" th:method="post" th:object="${book}">
+<form id="edit-form" action="bookEditForm.html" th:action="@{/updateBook}" th:method="post" th:object="${book}">
 
     <h3 th:text = "#{book-form-header}">Book Info:</h3>
 

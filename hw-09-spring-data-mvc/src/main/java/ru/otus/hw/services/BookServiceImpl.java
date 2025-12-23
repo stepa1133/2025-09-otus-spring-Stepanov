@@ -45,7 +45,7 @@ public class BookServiceImpl implements BookService {
     public List<BookDto> findAll() {
         return bookRepository.findAll()
                 .stream()
-                .map(bookDtoConverter::toDtoWithoutComments)
+                .map(bookDtoConverter::toDto)
                 .toList();
     }
 

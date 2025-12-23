@@ -31,41 +31,58 @@ public class BookController {
         return "list";
     }
 
-    @GetMapping("/bookEdit")
-    public String booksEdit(@RequestParam long id, Model model) {
-        BookDto book = bookService.findById(id).get();//todo
+    @GetMapping("/getBookEditForm")
+    public String editBookPage(@RequestParam long id, Model model) {
+        BookDto book = bookService.findById(id).get();
         List<AuthorDto> allAuthors = authorService.findAll();
         List<GenreDto> allGenres = genreService.findAll();
         BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getId(), book.getTitle(), book.getAuthor().getId(), book.getGenre().getId());
         model.addAttribute("book", bookUpdateDto);
         model.addAttribute("allAuthors", allAuthors);
         model.addAttribute("allGenres", allGenres);
-        return "bookEdit";
+        return "bookEditForm";
     }
 
-    @PostMapping("/edit")
-    public String editBook(@Valid @ModelAttribute("book") BookUpdateDto book,
+    @PostMapping("/updateBook")
+    public String updateBook(@Valid @ModelAttribute("book") BookUpdateDto book,
                              BindingResult bindingResult,
                              Model model) {
         if (bindingResult.hasErrors()) {
-            List<AuthorDto> allAuthors = authorService.findAll();
-            List<GenreDto> allGenres = genreService.findAll();
-            model.addAttribute("book", book);
-            model.addAttribute("allAuthors", allAuthors);
-            model.addAttribute("allGenres", allGenres);
-            return "bookEdit";
+            return "bookEditForm";
         }
         bookService.update(book.getId(), book.getTitle(), book.getAuthorId(), book.getGenreId());
         return "redirect:/";
     }
 
-    @GetMapping("/addBook")
+    @GetMapping("/getBookAddForm")
     public String addBook(Model model) {
         List<AuthorDto> allAuthors = authorService.findAll();
         List<GenreDto> allGenres = genreService.findAll();
         model.addAttribute("book", new BookUpdateDto());
         model.addAttribute("allAuthors", allAuthors);
         model.addAttribute("allGenres", allGenres);
-        return "addbook";
+        return "bookAddForm";
     }
+
+    @PostMapping("/insertBook")
+    public String insertBook(@Valid @ModelAttribute("book") BookUpdateDto bookUpdateDto,
+                             BindingResult bindingResult,
+                             Model model) {
+        if (bindingResult.hasErrors()) {
+            List<AuthorDto> allAuthors = authorService.findAll();
+            List<GenreDto> allGenres = genreService.findAll();
+            model.addAttribute("allAuthors", allAuthors);
+            model.addAttribute("allGenres", allGenres);
+            return "bookAddForm";
+        }
+        bookService.insert(bookUpdateDto.getTitle(), bookUpdateDto.getAuthorId(), bookUpdateDto.getGenreId());
+        return "redirect:/";
+    }
+
+    @PostMapping("/delete/{id}")
+    public String deleteComment(@PathVariable("id") long id, Model model) {
+        bookService.deleteById(id);
+        return "redirect:/";
+    }
+
 }

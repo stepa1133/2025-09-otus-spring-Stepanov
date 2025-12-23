@@ -12,11 +12,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 public class BookUpdateDto {
-    @NotNull
+
     private Long id;
 
-    @NotBlank(message = "Book title can't be null")
-    @Size(min = 1, max = 100, message = "Book title should be with size from 1 to 100 symbols")
+    @NotBlank(message = "Название книги не может быть пустым")
+    @Size(min = 1, max = 100, message = "Название книги должно быть от 1 до 100 символов")
     private String title;
 
 

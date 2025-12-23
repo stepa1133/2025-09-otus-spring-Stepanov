@@ -69,8 +69,12 @@
         <td th:text="${book.getAuthor().getFullName()}">Daria Dontsova</td>
         <td th:text="${book.getGenre().getName()}">Adventure</td>
         <td>
-<!--            <a th:href="@{/bookEdit(id=${book.id})}" href="bookEdit.html" th:text="#{edit-button-caption}">Edit</a>-->
-            <form th:action="@{/bookEdit}" method="get" class="action-form">
+            <form th:action="@{/getCommentsList}" method="get" class="action-form">
+                <input type="hidden" name="id" th:value="${book.getId()}"/>
+                <button type="submit" class="action-btn edit-btn"
+                        th:text="#{edit-comments-caption}">Edit comments</button>
+            </form>
+            <form th:action="@{/getBookEditForm}" method="get" class="action-form">
                 <input type="hidden" name="id" th:value="${book.id}"/>
                 <button type="submit" class="action-btn edit-btn"
                         th:text="#{edit-button-caption}">Edit</button>
@@ -97,7 +101,7 @@
             </a>
         </td>-->
         <td>
-            <form th:action="@{/addBook}" method="get" class="action-form">
+            <form th:action="@{/getBookAddForm}" method="get" class="action-form">
                 <button type="submit" class="action-btn add-btn"
                         th:text="#{add-new-book-button}">Add New Book</button>
             </form>
