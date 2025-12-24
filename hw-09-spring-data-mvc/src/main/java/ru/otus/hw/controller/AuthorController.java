@@ -12,10 +12,11 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 public class AuthorController {
+
     private final AuthorServiceImpl authorService;
 
     @GetMapping("/getAuthorsList")
-    public String authorsListPage( Model model) {
+    public String authorsListPage(Model model) {
         List<AuthorDto> authors = authorService.findAll();
         model.addAttribute("authors", authors);
         return "authorsList";

@@ -43,7 +43,6 @@
 <body>
 
 <form id="add-form" th:action="@{/insertComment}" th:method="post" th:object="${comment}">
-    <!-- Скрытые поля -->
     <input type="hidden" th:field="*{bookId}"/>
     <input type="hidden" th:field="*{id}"/>
 

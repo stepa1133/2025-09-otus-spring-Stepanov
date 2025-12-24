@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class BookDtoConverter {
+
     private final AuthorDtoConverter authorDtoConverter;
 
     private final GenreDtoConverter genreDtoConverter;
@@ -48,7 +49,10 @@ public class BookDtoConverter {
     }
 
     public Book toDomain(BookDto bookDto) {
-        List<Comment> comments = bookDto.getComments().stream().map(commentDtoConverter::toDomain).collect(Collectors.toList());
+        List<Comment> comments = bookDto.getComments()
+                .stream()
+                .map(commentDtoConverter::toDomain)
+                .collect(Collectors.toList());
         Author author = authorDtoConverter.toDomain(bookDto.getAuthor());
         Genre genre = genreDtoConverter.toDomain(bookDto.getGenre());
         return new Book(bookDto.getId(), bookDto.getTitle(), author, genre, comments);

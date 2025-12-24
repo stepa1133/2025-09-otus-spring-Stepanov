@@ -6,7 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.otus.hw.converters.dto.BookUpdateDto;
 import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.dto.BookDto;
@@ -22,8 +26,11 @@ import java.util.List;
 public class BookController {
 
     private final BookServiceImpl bookService;
+
     private final AuthorServiceImpl authorService;
+
     private final GenreServiceImpl genreService;
+
     @GetMapping("/")
     public String listPage(Model model) {
         List<BookDto> books = bookService.findAll();
@@ -36,7 +43,8 @@ public class BookController {
         BookDto book = bookService.findById(id).get();
         List<AuthorDto> allAuthors = authorService.findAll();
         List<GenreDto> allGenres = genreService.findAll();
-        BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getId(), book.getTitle(), book.getAuthor().getId(), book.getGenre().getId());
+        BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getId(), book.getTitle(),
+                                                                    book.getAuthor().getId(), book.getGenre().getId());
         model.addAttribute("book", bookUpdateDto);
         model.addAttribute("allAuthors", allAuthors);
         model.addAttribute("allGenres", allGenres);

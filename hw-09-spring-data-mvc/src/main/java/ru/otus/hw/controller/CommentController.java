@@ -21,6 +21,7 @@ import java.util.List;
 public class CommentController {
 
     private final CommentServiceImpl commentService;
+
     @GetMapping("/getCommentsList")
     public String commentsListPage(@RequestParam("id") long bookId, Model model) {
         List<CommentDto> comments = commentService.findAllBookComments(bookId);
@@ -36,22 +37,6 @@ public class CommentController {
         model.addAttribute("comment", commentUpdateDto);
         return "commentAddForm";
     }
-
-/*    @PostMapping("/insertComment")
-    public String insertComment(@Valid @ModelAttribute CommentUpdateDto commentUpdateDto,
-                                BindingResult bindingResult,
-                                Model model) {
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("comment", commentUpdateDto);
-            return "commentAddForm";
-        }
-        commentService.insert(commentUpdateDto.getBookId(), commentUpdateDto.getCommentary());
-        List<CommentDto> comments = commentService.findAllBookComments(commentUpdateDto.getBookId());
-        model.addAttribute("comments", comments);
-        model.addAttribute("bookId", commentUpdateDto.getBookId());
-        return "redirect:/getCommentsList?id=%s".formatted(commentUpdateDto.getBookId());
-
-    }*/
 
     @PostMapping("/insertComment")
     public String insertComment(@Valid @ModelAttribute("comment") CommentUpdateDto commentUpdateDto,

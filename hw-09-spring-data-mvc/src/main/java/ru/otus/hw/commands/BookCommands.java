@@ -5,7 +5,6 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import ru.otus.hw.converters.BookConverter;
 import ru.otus.hw.converters.dto.BookDtoConverter;
-import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.services.BookService;
 
 import java.util.stream.Collectors;
