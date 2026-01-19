@@ -14,7 +14,7 @@ import java.util.List;
 public class GenreController {
     private final GenreServiceImpl genreService;
 
-    @GetMapping("/getGenresList")
+    @GetMapping("/genre")
     public String genresListPage(Model model) {
         List<GenreDto> genres = genreService.findAll();
         model.addAttribute("genres", genres);

@@ -22,7 +22,7 @@ public class CommentController {
 
     private final CommentServiceImpl commentService;
 
-    @GetMapping("/getCommentsList")
+    @GetMapping("/comment")
     public String commentsListPage(@RequestParam("id") long bookId, Model model) {
         List<CommentDto> comments = commentService.findAllBookComments(bookId);
         model.addAttribute("comments", comments);
