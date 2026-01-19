@@ -21,20 +21,20 @@ public class BookRestController {
 
     private final GenreServiceImpl genreService;
 
-    @PutMapping("/book/{id}")
+    @PutMapping("/book/{id}")//+ нужна валидация
     public ResponseEntity<Void> updateBook(@PathVariable Long id, @Valid @RequestBody BookUpdateDto book) {
         bookService.update(id, book.getTitle(), book.getAuthorId(), book.getGenreId());
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/book")
+    @PostMapping("/book")//+
     public ResponseEntity<Void> insertBook(@Valid @RequestBody BookUpdateDto bookUpdateDto) {
         bookService.insert(bookUpdateDto.getTitle(), bookUpdateDto.getAuthorId(), bookUpdateDto.getGenreId());
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/book/{id}")//+
-    public ResponseEntity<Void> deleteComment(@PathVariable("id") long id) {
+    @DeleteMapping("/book/{id}")//+  нужна валидация
+    public ResponseEntity<Void> deleteBook(@PathVariable("id") long id) {
         bookService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

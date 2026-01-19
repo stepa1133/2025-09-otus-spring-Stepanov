@@ -25,14 +25,14 @@ public class BookController {
 
     private final GenreServiceImpl genreService;
 
-    @GetMapping("/book")
+    @GetMapping("/book")//+
     public String getListBooksPage(Model model) {
         List<BookDto> books = bookService.findAll();
         model.addAttribute("books", books);
         return "list";
     }
 
-    @GetMapping("/book/{id}")
+    @GetMapping("/book/{id}")//+
     public String getEditCurBookPage(@PathVariable long id, Model model) {
         BookDto book = bookService.findById(id).get();
         List<AuthorDto> allAuthors = authorService.findAll();
@@ -47,7 +47,7 @@ public class BookController {
 
 
 
-    @GetMapping("/book/new")
+    @GetMapping("/book/new")//+
     public String getNewBookPage(Model model) {
         List<AuthorDto> allAuthors = authorService.findAll();
         List<GenreDto> allGenres = genreService.findAll();

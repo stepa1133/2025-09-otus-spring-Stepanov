@@ -107,5 +107,40 @@
     </div>
 </form>
 
+<script>
+    document.getElementById('edit-form').addEventListener('submit', function (event) {
+        event.preventDefault(); // отменяем стандартную отправку формы
+
+        const form = event.target;
+
+        const id = form.querySelector('#id-input').value;
+
+        const bookDto = {
+            id: id,
+            title: form.querySelector('[name="title"]').value,
+            authorId: form.querySelector('[name="authorId"]').value,
+            genreId: form.querySelector('[name="genreId"]').value
+        };
+
+        fetch(`/book/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bookDto)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка сохранения');
+                }
+                // после успешного сохранения
+                window.location.href = '/book';
+            })
+            .catch(error => {
+                alert(error.message);
+            });
+    });
+</script>
+
 </body>
 </html>

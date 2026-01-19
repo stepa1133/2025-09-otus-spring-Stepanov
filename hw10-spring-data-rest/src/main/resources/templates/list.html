@@ -73,8 +73,7 @@
                 </button>
             </form>
 
-            <form th:action="@{/getBookEditForm}" method="get" class="action-form">
-                <input type="hidden" name="id" th:value="${book.id}"/>
+            <form th:action="@{/book/{id}(id=${book.id})}" method="get" class="action-form">
                 <button type="submit" class="action-btn edit-btn"
                         th:text="#{edit-button-caption}">
                     Edit
