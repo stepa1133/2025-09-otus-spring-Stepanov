@@ -65,10 +65,8 @@
         <td th:text="${book.genre.name}">Adventure</td>
         <td>
 
-            <form th:action="@{/comment}" method="get" class="action-form">
-                <input type="hidden" name="id" th:value="${book.id}"/>
-                <button type="submit" class="action-btn edit-btn"
-                        th:text="#{edit-comments-caption}">
+            <form th:action="@{/book/{id}/comment(id=${book.id})}" method="get" class="action-form">
+                <button type="submit" class="action-btn edit-btn" th:text="#{edit-comments-caption}">
                     Edit comments
                 </button>
             </form>

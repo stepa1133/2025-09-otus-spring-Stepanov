@@ -4,7 +4,8 @@ package ru.otus.hw.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import ru.otus.hw.converters.dto.BookUpdateDto;
 import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.dto.BookDto;
@@ -25,14 +26,14 @@ public class BookController {
 
     private final GenreServiceImpl genreService;
 
-    @GetMapping("/book")//+
+    @GetMapping("/book")
     public String getListBooksPage(Model model) {
         List<BookDto> books = bookService.findAll();
         model.addAttribute("books", books);
         return "list";
     }
 
-    @GetMapping("/book/{id}")//+
+    @GetMapping("/book/{id}")
     public String getEditCurBookPage(@PathVariable long id, Model model) {
         BookDto book = bookService.findById(id).get();
         List<AuthorDto> allAuthors = authorService.findAll();
@@ -47,7 +48,7 @@ public class BookController {
 
 
 
-    @GetMapping("/book/new")//+
+    @GetMapping("/book/new")
     public String getNewBookPage(Model model) {
         List<AuthorDto> allAuthors = authorService.findAll();
         List<GenreDto> allGenres = genreService.findAll();
@@ -56,9 +57,5 @@ public class BookController {
         model.addAttribute("allGenres", allGenres);
         return "bookAddForm";
     }
-
-
-
-
 
 }

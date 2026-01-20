@@ -26,6 +26,9 @@
             text-align: center;
         }
 
+        button {
+            cursor: pointer;
+        }
     </style>
 
     <style type="text/css" th:inline="text">
@@ -56,16 +59,12 @@
         <td th:text="${comment.id}">1</td>
         <td th:text="${comment.commentary}">Kek</td>
         <td>
-            <form th:action="@{/commentary/delete/{id}/{bookId}
-        (id=${comment.id}, bookId=${comment.book.id})}"
-                  method="post"
-                  class="delete-form"
-                  th:attr="comment-text=${comment.commentary}"
-                  onsubmit="return confirm('Точно удалять комментарий ' + this.getAttribute('comment-text') + '?');">
-                <input type="hidden" name="_method" value="DELETE"/>
-
-                <button type="submit">Удалить</button>
-            </form>
+            <button type="button"
+                    th:attr="data-comment-id=${comment.id}"
+                    th:attrappend=" data-book-id=${bookId}"
+                    onclick="deleteComment(this)">
+                Удалить
+            </button>
         </td>
     </tr>
     </tbody>
@@ -76,11 +75,8 @@
             Всего комментариев: <span th:text="${comments.size()}">0</span>
         </td>
         <td>
-            <form th:action="@{/getAddCommentaryForm}" method="get" class="action-form">
-                <input type="hidden" name="id" th:value="${bookId}"/>
-                <button type="submit"
-                        class="action-btn add-btn"
-                        th:text="#{add-new-commentary-button}">
+            <form th:action="@{/book/{id}/comment/new(id=${bookId})}" method="get" class="action-form">
+                <button type="submit" class="action-btn add-btn" th:text="#{add-new-commentary-button}">
                     Add
                 </button>
             </form>
@@ -93,6 +89,29 @@
     </tr>
     </tfoot>
 </table>
+
+<script>
+    function deleteComment(button) {
+        const commentId = button.getAttribute('data-comment-id');
+        const bookId = button.getAttribute('data-book-id');
+        const commentText = button.closest('tr').querySelector('td:nth-child(2)').innerText;
+
+        if (!confirm('Точно удалять комментарий "' + commentText + '"?')) return;
+
+        fetch(`/book/${bookId}/comment/${commentId}`, {
+            method: 'DELETE'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка при удалении комментария');
+                }
+                window.location.reload();
+            })
+            .catch(error => {
+                alert(error.message);
+            });
+    }
+</script>
 
 </body>
 </html>

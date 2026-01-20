@@ -42,7 +42,7 @@
 </head>
 <body>
 
-<form id="add-form" th:action="@{/insertComment}" th:method="post" th:object="${comment}">
+<form id="add-form" th:action="@{/book/{id}/comment(id=${comment.bookId})}" th:method="post" th:object="${comment}">
     <input type="hidden" th:field="*{bookId}"/>
     <input type="hidden" th:field="*{id}"/>
 
@@ -53,21 +53,66 @@
         <input id="commentary-input"
                type="text"
                th:field="*{commentary}"
-               th:classappend="${#fields.hasErrors('commentary')} ? 'error-field' : ''"
                placeholder="Введите комментарий сюда"/>
-        <div class="errors"
-             th:if="${#fields.hasErrors('commentary')}"
-             th:errors="*{commentary}">
-        </div>
+        <div class="errors" id="error-commentary"></div>
     </div>
 
     <div class="row">
         <button type="submit">Сохранить</button>
-        <a th:href="@{/getCommentsList(id=${comment.bookId})}">
+        <a th:href="@{/book/{id}/comment(id=${comment.bookId})}">
             <button type="button">Отменить</button>
         </a>
     </div>
 </form>
+
+<script>
+    document.getElementById('add-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const form = event.target;
+
+        const bookId = form.querySelector('[name="bookId"]').value;
+        const commentary = form.querySelector('[name="commentary"]').value.trim();
+        const id = form.querySelector('[name="id"]').value;
+
+        const dto = {
+            id: id ? Number(id) : null,
+            bookId: Number(bookId),
+            commentary: commentary
+        };
+        form.querySelectorAll('.errors').forEach(e => e.innerText = '');
+        form.querySelectorAll('.error-field').forEach(e => e.classList.remove('error-field'));
+
+        fetch(`/book/${bookId}/comment/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dto)
+        })
+            .then(async response => {
+                if (response.status === 400) {
+                    const errors = await response.json();
+                    Object.keys(errors).forEach(field => {
+                        const input = form.querySelector(`[name="${field}"]`);
+                        if (input) {
+                            input.classList.add('error-field');
+                            const errorBlock = document.getElementById(`error-${field}`);
+                            if (errorBlock) {
+                                errorBlock.innerText = errors[field];
+                            }
+                        }
+                    });
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Ошибка при сохранении комментария');
+                }
+
+                window.location.href = `/book/${bookId}/comment`;
+            })
+            .catch(error => alert(error.message));
+    });
+</script>
 
 </body>
 </html>
