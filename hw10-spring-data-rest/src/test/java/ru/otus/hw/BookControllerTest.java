@@ -1,9 +1,13 @@
 package ru.otus.hw;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.controller.BookController;
@@ -11,6 +15,7 @@ import ru.otus.hw.converters.dto.BookUpdateDto;
 import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.GenreDto;
+import ru.otus.hw.rest.BookRestController;
 import ru.otus.hw.services.AuthorServiceImpl;
 import ru.otus.hw.services.BookServiceImpl;
 import ru.otus.hw.services.GenreServiceImpl;
@@ -18,15 +23,14 @@ import ru.otus.hw.services.GenreServiceImpl;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
-@WebMvcTest(BookController.class)
+@WebMvcTest({BookRestController.class, BookController.class})
 public class BookControllerTest {
     @MockitoBean
     private BookServiceImpl bookService;
@@ -38,6 +42,9 @@ public class BookControllerTest {
     private  GenreServiceImpl genreService;
 
     @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
     private MockMvc mvc;
 
 
@@ -45,7 +52,7 @@ public class BookControllerTest {
     void shouldRenderListPageWithCorrectViewAndModelAttributes() throws Exception {
         List<BookDto> books = getDbBooks();
         when(bookService.findAll()).thenReturn(books);
-        mvc.perform(get("/"))
+        mvc.perform(get("/book"))
                 .andExpect(view().name("list"))
                 .andExpect(model().attribute("books", books));
     }
@@ -61,7 +68,7 @@ public class BookControllerTest {
 
 
 
-        mvc.perform(get("/getBookEditForm").param("id", "1"))
+        mvc.perform(get("/book/1"))
                 .andExpect(view().name("bookEditForm"))
                 .andExpect(model().attribute("book", new BookUpdateDto(
                         expectedBook.get().getId(),
@@ -74,41 +81,52 @@ public class BookControllerTest {
 
     @Test
     void shouldUpdateBook() throws Exception {
-        var expectedBook = Optional.ofNullable(getDbBooks().get(0));
-        when(bookService.insert(
-                expectedBook.get().getTitle(),
-                expectedBook.get().getAuthor().getId(),
-                expectedBook.get().getGenre().getId())).thenReturn(expectedBook.get());
-        mvc.perform(post("/updateBook")
-                        .param("id", "1")
-                        .param("title", expectedBook.get().getTitle())
-                        .param("authorId", String.valueOf(expectedBook.get().getAuthor().getId()))
-                        .param("genreId", String.valueOf(expectedBook.get().getGenre().getId()))
-                       )
-                .andExpect((view().name("redirect:/")));
+        BookDto bookDto = getDbBooks().get(0);
+        BookUpdateDto bookToSend = new BookUpdateDto(
+                bookDto.getId(),
+                bookDto.getTitle(),
+                bookDto.getAuthor().getId(),
+                bookDto.getGenre().getId());
+
+        when(bookService.update(bookDto.getId(), bookDto.getTitle(),
+                bookDto.getAuthor().getId(), bookDto.getGenre().getId()))
+                .thenReturn(bookDto);
+
+        mvc.perform(put("/book/{id}", bookDto.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookToSend))).andExpect(status().isOk());
+        verify(bookService, times(1)).update(  bookDto.getId(),
+                bookDto.getTitle(),
+                bookDto.getAuthor().getId(),
+                bookDto.getGenre().getId());
     }
+
 
     @Test
     void shouldInsertNewBook() throws Exception {
-        var expectedBook = Optional.ofNullable(getDbBooks().get(0));
+        BookDto newBook = getDbBooks().get(0);
+        BookUpdateDto newBookUpdateDto = new BookUpdateDto(1L, newBook.getTitle(),
+                newBook.getAuthor().getId(),
+                newBook.getGenre().getId());
         when(bookService.insert(
-                expectedBook.get().getTitle(),
-                expectedBook.get().getAuthor().getId(),
-                expectedBook.get().getGenre().getId())).thenReturn(expectedBook.get());
-        mvc.perform(post("/insertBook")
-                        .param("id", "1")
-                        .param("title", expectedBook.get().getTitle())
-                        .param("authorId", String.valueOf(expectedBook.get().getAuthor().getId()))
-                        .param("genreId", String.valueOf(expectedBook.get().getGenre().getId()))
-                )
-                .andExpect((view().name("redirect:/")));
+                newBook.getTitle(),
+                newBook.getAuthor().getId(),
+                newBook.getGenre().getId())).thenReturn(newBook);
+        mvc.perform(post("/book").contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newBookUpdateDto)))
+                        .andExpect(status().isOk());
+        verify(bookService, times(1)).insert(
+                newBook.getTitle(),
+                newBook.getAuthor().getId(),
+                newBook.getGenre().getId()
+        );
     }
 
-    @Test
-    void shouldRenderDeleteCurrentBook() throws Exception {
-        doNothing().when(bookService).deleteById(1);
-        mvc.perform(post("/delete/1"))
-                .andExpect((view().name("redirect:/")));
+    @ParameterizedTest
+    @ValueSource(longs = {1, 2, 3, 4, 5, 6})
+    void shouldRenderDeleteCurrentBook(Long bookId) throws Exception {
+        mvc.perform(delete("/book/{bookId}", bookId)).andExpect(status().isNoContent());
+        verify(bookService).deleteById(bookId);
     }
 
 

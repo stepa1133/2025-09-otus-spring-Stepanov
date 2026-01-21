@@ -33,7 +33,7 @@ public class AuthorControllerTest {
     @Test
     void shouldRenderListPageWithCorrectViewAndModelAttributes() throws Exception {
         when(service.findAll()).thenReturn(authors);
-        mvc.perform(get("/getAuthorsList"))
+        mvc.perform(get("/author"))
                 .andExpect(view().name("authorsList"))
                 .andExpect(model().attribute("authors", authors));
     }

@@ -31,7 +31,7 @@ public class GenreControllerTest {
     @Test
     void shouldRenderListPageWithCorrectViewAndModelAttributes() throws Exception {
         when(service.findAll()).thenReturn(genres);
-        mvc.perform(get("/getGenresList"))
+        mvc.perform(get("/genre"))
                 .andExpect(view().name("genresList"))
                 .andExpect(model().attribute("genres", genres));
     }
