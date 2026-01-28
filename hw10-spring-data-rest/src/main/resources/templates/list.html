@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>List of all books</title>
+
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+
+        .books {
+            border: 1px solid steelblue;
+            width: 300px;
+            border-collapse: collapse;
+        }
+
+        .books tr td, th {
+            padding: 5px;
+            border: 1px solid steelblue;
+        }
+
+        .books td:last-child, td:first-child {
+            width: 50px;
+        }
+
+        h3 {
+            background-image: url("../static/listmark.png");
+            background-repeat: no-repeat;
+            padding: 2px;
+            padding-left: 30px;
+        }
+    </style>
+
+    <style type="text/css" th:inline="text">
+        [[h3]] {
+            background-image: url([[@{/listmark.png}]]);
+            background-repeat: no-repeat;
+            padding: 2px;
+            padding-left: 30px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h3 th:text="#{books-table-header}">Books:</h3>
+
+<table class="books">
+    <thead>
+    <tr>
+        <th th:text="#{book-field-id}">ID</th>
+        <th th:text="#{book-field-name}">Name</th>
+        <th th:text="#{book-field-author}">Author</th>
+        <th th:text="#{book-field-genre}">Genre</th>
+        <th th:text="#{books-table-column-action}">Action</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr th:each="book : ${books}">
+        <td th:text="${book.id}">1</td>
+        <td th:text="${book.title}">Harry Potter</td>
+        <td th:text="${book.author.fullName}">Daria Dontsova</td>
+        <td th:text="${book.genre.name}">Adventure</td>
+        <td>
+
+            <form th:action="@{/book/{id}/comment(id=${book.id})}" method="get" class="action-form">
+                <button type="submit" class="action-btn edit-btn" th:text="#{edit-comments-caption}">
+                    Edit comments
+                </button>
+            </form>
+
+            <form th:action="@{/book/{id}(id=${book.id})}" method="get" class="action-form">
+                <button type="submit" class="action-btn edit-btn"
+                        th:text="#{edit-button-caption}">
+                    Edit
+                </button>
+            </form>
+
+            <!-- DELETE через fetch -->
+            <form class="delete-form"
+                  th:attr="data-id=${book.id}, data-title=${book.title}">
+                <button type="submit">Удалить</button>
+            </form>
+
+        </td>
+    </tr>
+    </tbody>
+
+    <tfoot>
+    <tr>
+        <td colspan="4" style="text-align: center; font-style: italic;">
+            Всего книг: <span th:text="${books.size()}">0</span>
+        </td>
+        <td>
+            <form th:action="@{/book/new}" method="get" class="action-form">
+                <button type="submit" class="action-btn add-btn"
+                        th:text="#{add-new-book-button}">
+                    Add New Book
+                </button>
+            </form>
+
+            <form th:action="@{/author}" method="get" class="action-form" style="display:inline-block; margin-left: 10px;">
+                <button type="submit" class="action-btn add-btn" th:text="Авторы">Authors</button>
+            </form>
+
+            <form th:action="@{/genre}" method="get" class="action-form" style="display:inline-block; margin-left: 10px;">
+                <button type="submit" class="action-btn add-btn" th:text="Жанры">Genres</button>
+            </form>
+        </td>
+    </tr>
+    </tfoot>
+</table>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        document.querySelectorAll(".delete-form").forEach(form => {
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                const bookId = form.dataset.id;
+                const bookTitle = form.dataset.title;
+
+                if (!confirm('Ну и зачем удалять книгу "' + bookTitle + '"?')) {
+                    return;
+                }
+
+                fetch(`/book/${bookId}`, {
+                    method: "DELETE"
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            alert("Ошибка при удалении книги");
+                        }
+                    })
+                    .catch(() => {
+                        alert("Сервер недоступен");
+                    });
+            });
+        });
+
+    });
+</script>
+
+</body>
+</html>
