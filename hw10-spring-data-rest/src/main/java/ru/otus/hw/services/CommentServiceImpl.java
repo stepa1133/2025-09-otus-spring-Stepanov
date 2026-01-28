@@ -39,7 +39,7 @@ public class CommentServiceImpl implements CommentService {
         return commentRepository.findByBookId(bookId)
                 .stream()
                 .map(commentDtoConverter::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

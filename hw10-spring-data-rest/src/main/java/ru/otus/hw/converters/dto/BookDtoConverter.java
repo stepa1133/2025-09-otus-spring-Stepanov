@@ -32,7 +32,7 @@ public class BookDtoConverter {
         }
         List<CommentDto> comments = book.getComments() == null ? Collections.emptyList() : book.getComments().stream()
                 .map(commentDtoConverter::toDto)
-                .collect(Collectors.toList());
+                .toList();
         AuthorDto authorDto = authorDtoConverter.toDto(book.getAuthor());
         GenreDto genreDto = genreDtoConverter.toDto(book.getGenre());
         return new BookDto(book.getId(), book.getTitle(), authorDto, genreDto, comments);
@@ -52,7 +52,7 @@ public class BookDtoConverter {
         List<Comment> comments = bookDto.getComments()
                 .stream()
                 .map(commentDtoConverter::toDomain)
-                .collect(Collectors.toList());
+                .toList();
         Author author = authorDtoConverter.toDomain(bookDto.getAuthor());
         Genre genre = genreDtoConverter.toDomain(bookDto.getGenre());
         return new Book(bookDto.getId(), bookDto.getTitle(), author, genre, comments);
