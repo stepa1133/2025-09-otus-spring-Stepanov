@@ -28,10 +28,9 @@ public class CommentRestController {
         return commentService.deleteById(commentId).then(Mono.just(ResponseEntity.noContent().build()));
     }
 
-    @PostMapping("/book/{id}/comment/")
-    public ResponseEntity<Void> insertComment(@PathVariable("id") long bookId,
+    @PostMapping("/book/{id}/comment/") //+
+    public Mono<CommentDto> insertComment(@PathVariable("id") long bookId,
                                               @Valid @RequestBody CommentUpdateDto commentUpdateDto) {
-        commentService.insert(bookId, commentUpdateDto.getCommentary());
-        return ResponseEntity.ok().build();
+        return commentService.insert(bookId, commentUpdateDto.getCommentary());
     }
 }

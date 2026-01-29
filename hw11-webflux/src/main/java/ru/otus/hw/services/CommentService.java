@@ -14,7 +14,6 @@ public interface CommentService {
 
     Mono<CommentDto> insert(long bookId, String commentary);
 
-    Mono<CommentDto> update(long bookId, long id, String commentary);
 
     Mono<Void> deleteById(long id);
 

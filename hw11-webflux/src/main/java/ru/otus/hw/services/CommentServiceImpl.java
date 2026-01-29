@@ -11,6 +11,7 @@ import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
 import ru.otus.hw.repositories.BookRepository;
+import ru.otus.hw.repositories.BookRepositoryCustom;
 import ru.otus.hw.repositories.CommentRepository;
 import ru.otus.hw.repositories.CommentRepositoryCustom;
 
@@ -26,6 +27,8 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
 
     private final BookRepository bookRepository;
+
+    private final BookRepositoryCustom bookRepositoryCustom;
 
     private final CommentDtoConverter commentDtoConverter;
 
@@ -52,12 +55,6 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public Mono<CommentDto> update(long id, long bookId, String commentary) {
-        return save(id, bookId, commentary);
-    }
-
-    @Override
-    @Transactional
     public Mono<Void> deleteById(long id) {
         return commentRepository.deleteById(id);
     }
@@ -69,11 +66,11 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private Mono<CommentDto> save(long id, long bookId, String commentary) {
-        return bookRepository.findById(bookId)
+        return bookRepositoryCustom.findById(bookId)
                 .switchIfEmpty(Mono.error(new EntityNotFoundException("Book with id %d not found".formatted(bookId))))
                 .flatMap(book -> {
                     Comment comment = new Comment(id, book, commentary);
-                    return commentRepository.save(comment);
+                    return commentRepositoryCustom.save(comment);
                 })
                 .map(commentDtoConverter::toDto);
     }

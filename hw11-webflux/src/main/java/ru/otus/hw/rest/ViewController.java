@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import ru.otus.hw.converters.dto.CommentUpdateDto;
 
 @Controller
 public class ViewController {
@@ -23,6 +24,11 @@ public class ViewController {
 //        model.addAttribute("allAuthors", allAuthors);
 //        model.addAttribute("allGenres", allGenres);
         return "bookEditForm";
+    }
+
+    @GetMapping("/book/{id}/comment/new") //+
+    public String addCommentaryPage(@PathVariable("id") long bookId, Model model) {
+        return "commentAddForm";
     }
 
     @GetMapping("/book/{id}/comment") //+

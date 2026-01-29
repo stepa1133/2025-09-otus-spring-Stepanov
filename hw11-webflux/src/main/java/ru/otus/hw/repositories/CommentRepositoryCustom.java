@@ -23,16 +23,30 @@ public class CommentRepositoryCustom {
                 JOIN books as b ON c.book_id = b.id
                 JOIN authors as a on b.author_id = a.id
                  JOIN genres as g on b.genre_id = g.id
-          WHERE b.id = %s
+          WHERE b.id = $1
             """;
 
 
     public Flux<Comment> findByBookId(long id) {
         return template.getDatabaseClient().inConnectionMany(connection ->
-                Flux.from(connection.createStatement(SQL_ALL.formatted(id))
+                Flux.from(connection.createStatement(SQL_ALL)
+                                .bind(0, id)
                                 .execute())
                         .flatMap(result -> result.map(this::mapper)));
     }
+
+    public Mono<Comment> save(Comment comment) {
+        return template.getDatabaseClient()
+                .sql("INSERT INTO comments (book_id, commentary) VALUES ($1, $2)")
+                .bind(0, comment.getBook().getId())       // $1 → bookId
+                .bind(1, comment.getCommentary())         // $2 → commentary
+                .fetch()
+                .rowsUpdated()                             // выполняем insert
+                .thenReturn(comment);                      // возвращаем исходный объект
+    }
+
+
+
 
     private Comment mapper(Readable selectedRecord) {
         try {

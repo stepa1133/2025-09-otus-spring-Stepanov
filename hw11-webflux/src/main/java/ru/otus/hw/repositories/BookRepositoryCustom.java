@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
@@ -30,6 +31,14 @@ public class BookRepositoryCustom {
                 Flux.from(connection.createStatement(SQL_ALL)
                                 .execute())
                         .flatMap(result -> result.map(this::mapper)));
+    }
+
+    public Mono<Book> findById(Long id) {
+        return template.getDatabaseClient()
+                .sql(SQL_ALL + " WHERE b.id = :id")
+                .bind("id", id)
+                .map(this::mapper)
+                .one();
     }
 
     private Book mapper(Readable selectedRecord) {

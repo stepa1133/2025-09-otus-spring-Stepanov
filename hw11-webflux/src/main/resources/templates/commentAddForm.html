@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="ru">
 <head>
     <meta charset="UTF-8"/>
     <title>Добавить комментарий</title>
+
     <style type="text/css">
         body {
             padding: 50px;
@@ -28,7 +29,7 @@
         .error-field {
             border: 1px solid red;
         }
-        input, select {
+        input {
             padding: 5px;
             width: 300px;
             box-sizing: border-box;
@@ -42,75 +43,70 @@
 </head>
 <body>
 
-<form id="add-form" th:action="@{/book/{id}/comment(id=${comment.bookId})}" th:method="post" th:object="${comment}">
-    <input type="hidden" th:field="*{bookId}"/>
-    <input type="hidden" th:field="*{id}"/>
+<h3>Добавьте новый комментарий:</h3>
 
-    <h3>Добавьте новый комментарий:</h3>
-
+<form id="add-form">
     <div class="row">
-        <label for="commentary-input">Текст комментария:</label>
-        <input id="commentary-input"
-               type="text"
-               th:field="*{commentary}"
-               placeholder="Введите комментарий сюда"/>
+        <label for="commentary">Текст комментария:</label>
+        <input id="commentary" type="text" name="commentary" placeholder="Введите комментарий сюда"/>
         <div class="errors" id="error-commentary"></div>
     </div>
 
     <div class="row">
         <button type="submit">Сохранить</button>
-        <a th:href="@{/book/{id}/comment(id=${comment.bookId})}">
-            <button type="button">Отменить</button>
-        </a>
+        <button type="button" id="cancel-btn">Отменить</button>
     </div>
 </form>
 
 <script>
-    document.getElementById('add-form').addEventListener('submit', function (event) {
+    // bookId берём из URL: /book/{id}/comment/new
+    const pathParts = window.location.pathname.split('/');
+    const bookId = pathParts[2];
+
+    const form = document.getElementById('add-form');
+
+    // ОТМЕНА
+    document.getElementById('cancel-btn').addEventListener('click', () => {
+        window.location.href = `/book/${bookId}/comment`;
+    });
+
+    // СОХРАНИТЬ
+    form.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        const form = event.target;
+        const commentaryInput = document.getElementById('commentary');
+        const commentary = commentaryInput.value.trim();
 
-        const bookId = form.querySelector('[name="bookId"]').value;
-        const commentary = form.querySelector('[name="commentary"]').value.trim();
-        const id = form.querySelector('[name="id"]').value;
+        // очистка ошибок
+        document.querySelectorAll('.errors').forEach(e => e.innerText = '');
+        commentaryInput.classList.remove('error-field');
 
-        const dto = {
-            id: id ? Number(id) : null,
-            bookId: Number(bookId),
-            commentary: commentary
-        };
-        form.querySelectorAll('.errors').forEach(e => e.innerText = '');
-        form.querySelectorAll('.error-field').forEach(e => e.classList.remove('error-field'));
+        try {
+            const response = await fetch(`/book/${bookId}/comment/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ commentary })
+            });
 
-        fetch(`/book/${bookId}/comment/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dto)
-        })
-            .then(async response => {
-                if (response.status === 400) {
-                    const errors = await response.json();
-                    Object.keys(errors).forEach(field => {
-                        const input = form.querySelector(`[name="${field}"]`);
-                        if (input) {
-                            input.classList.add('error-field');
-                            const errorBlock = document.getElementById(`error-${field}`);
-                            if (errorBlock) {
-                                errorBlock.innerText = errors[field];
-                            }
-                        }
-                    });
-                    return;
+            if (response.status === 400) {
+                const errors = await response.json();
+                if (errors.commentary) {
+                    commentaryInput.classList.add('error-field');
+                    document.getElementById('error-commentary').innerText = errors.commentary;
                 }
+                return;
+            }
 
-                if (!response.ok) {
-                    throw new Error('Ошибка при сохранении комментария');
-                }
+            if (!response.ok) {
+                throw new Error('Ошибка при сохранении комментария');
+            }
 
-                window.location.href = `/book/${bookId}/comment`;
-            })
-            .catch(error => alert(error.message));
+            // успех → назад к списку
+            window.location.href = `/book/${bookId}/comment`;
+
+        } catch (err) {
+            alert(err.message);
+        }
     });
 </script>
 

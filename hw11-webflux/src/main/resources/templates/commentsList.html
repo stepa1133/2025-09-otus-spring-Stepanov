@@ -62,9 +62,10 @@
             Всего комментариев: <span id="comments-count">0</span>
         </td>
         <td>
-            <form id="add-comment-form" class="action-form">
-                <button type="submit">Добавить</button>
-            </form>
+            <!-- КНОПКА ДОБАВИТЬ -->
+            <button type="button" onclick="goToAddComment()">Добавить</button>
+
+            <!-- НА ГЛАВНУЮ -->
             <form action="/book" method="get" class="action-form">
                 <button type="submit">На главную</button>
             </form>
@@ -74,7 +75,7 @@
 </table>
 
 <script>
-    // Получаем bookId из URL: /book/{id}/comment
+    // bookId из URL: /book/{id}/comment
     const pathParts = window.location.pathname.split('/');
     const bookId = pathParts[2];
 
@@ -137,7 +138,6 @@
             });
             if (!response.ok) throw new Error("Ошибка удаления комментария");
 
-            // Удаляем комментарий из локального состояния без полной перезагрузки
             setComments(state.comments.filter(c => c.id != commentId));
         } catch (err) {
             alert(err.message);
@@ -145,14 +145,12 @@
         }
     }
 
-    document.getElementById('add-comment-form').addEventListener('submit', e => {
-        e.preventDefault();
+    function goToAddComment() {
         window.location.href = `/book/${bookId}/comment/new`;
-    });
+    }
 
     document.addEventListener("DOMContentLoaded", loadComments);
 </script>
-
 
 </body>
 </html>
