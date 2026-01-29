@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="ru">
 <head>
     <meta charset="UTF-8"/>
-    <title>List of all comments</title>
+    <title>Список комментариев</title>
 
     <style type="text/css">
         body {
             padding: 50px;
+            font-family: Arial, sans-serif;
         }
+
         .comments {
             border: 1px solid steelblue;
-            width: 300px;
+            width: 500px;
             border-collapse: collapse;
         }
 
@@ -29,61 +31,42 @@
         button {
             cursor: pointer;
         }
-    </style>
 
-    <style type="text/css" th:inline="text">
-        h3 {
-            background-image: url([[@{/listmark.png}]]);
-            background-repeat: no-repeat;
-            padding: 2px;
-            padding-left: 30px;
+        .action-form {
+            display: inline-block;
+            margin-right: 5px;
         }
     </style>
 </head>
 
 <body>
 
-<h3 th:text="#{comments-table-header}">Comments:</h3>
+<h3>Комментарии книги</h3>
 
 <table class="comments">
     <thead>
     <tr>
-        <th th:text="#{book-field-id}">ID</th>
-        <th th:text="#{comment-field-name}">Comment</th>
-        <th th:text="#{books-table-column-action}">Action</th>
+        <th>ID</th>
+        <th>Комментарий</th>
+        <th>Действия</th>
     </tr>
     </thead>
 
-    <tbody>
-    <tr th:each="comment : ${comments}">
-        <td th:text="${comment.id}">1</td>
-        <td th:text="${comment.commentary}">Kek</td>
-        <td>
-            <button type="button"
-                    th:attr="data-comment-id=${comment.id}"
-                    th:attrappend=" data-book-id=${bookId}"
-                    onclick="deleteComment(this)">
-                Удалить
-            </button>
-        </td>
-    </tr>
+    <tbody id="comments-body">
+    <!-- JS рендер -->
     </tbody>
 
     <tfoot>
     <tr>
         <td colspan="2" style="text-align: center; font-style: italic;">
-            Всего комментариев: <span th:text="${comments.size()}">0</span>
+            Всего комментариев: <span id="comments-count">0</span>
         </td>
         <td>
-            <form th:action="@{/book/{id}/comment/new(id=${bookId})}" method="get" class="action-form">
-                <button type="submit" class="action-btn add-btn" th:text="#{add-new-commentary-button}">
-                    Add
-                </button>
+            <form id="add-comment-form" class="action-form">
+                <button type="submit">Добавить</button>
             </form>
-            <form th:action="@{/book}" method="get" class="action-form" style="display: inline-block;">
-                <button type="submit" class="action-btn">
-                    На главную
-                </button>
+            <form action="/book" method="get" class="action-form">
+                <button type="submit">На главную</button>
             </form>
         </td>
     </tr>
@@ -91,27 +74,85 @@
 </table>
 
 <script>
-    function deleteComment(button) {
+    // Получаем bookId из URL: /book/{id}/comment
+    const pathParts = window.location.pathname.split('/');
+    const bookId = pathParts[2];
+
+    const state = {
+        comments: []
+    };
+
+    function setComments(comments) {
+        state.comments = comments;
+        render();
+    }
+
+    function render() {
+        const tbody = document.getElementById("comments-body");
+        const count = document.getElementById("comments-count");
+
+        tbody.innerHTML = "";
+        count.textContent = state.comments.length;
+
+        state.comments.forEach(comment => {
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+                <td>${comment.id}</td>
+                <td>${comment.commentary}</td>
+                <td>
+                    <button type="button"
+                            data-comment-id="${comment.id}"
+                            onclick="deleteComment(this)">
+                        Удалить
+                    </button>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    async function loadComments() {
+        try {
+            const response = await fetch(`/api/book/${bookId}/comment`);
+            if (!response.ok) throw new Error("Ошибка загрузки комментариев");
+            const data = await response.json();
+            setComments(data);
+        } catch (err) {
+            alert("Ошибка загрузки комментариев");
+            console.error(err);
+        }
+    }
+
+    async function deleteComment(button) {
         const commentId = button.getAttribute('data-comment-id');
-        const bookId = button.getAttribute('data-book-id');
         const commentText = button.closest('tr').querySelector('td:nth-child(2)').innerText;
 
-        if (!confirm('Точно удалять комментарий "' + commentText + '"?')) return;
+        if (!confirm(`Точно удалить комментарий "${commentText}"?`)) return;
 
-        fetch(`/book/${bookId}/comment/${commentId}`, {
-            method: 'DELETE'
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Ошибка при удалении комментария');
-                }
-                window.location.reload();
-            })
-            .catch(error => {
-                alert(error.message);
+        try {
+            const response = await fetch(`/api/book/${bookId}/comment/${commentId}`, {
+                method: 'DELETE'
             });
+            if (!response.ok) throw new Error("Ошибка удаления комментария");
+
+            // Удаляем комментарий из локального состояния без полной перезагрузки
+            setComments(state.comments.filter(c => c.id != commentId));
+        } catch (err) {
+            alert(err.message);
+            console.error(err);
+        }
     }
+
+    document.getElementById('add-comment-form').addEventListener('submit', e => {
+        e.preventDefault();
+        window.location.href = `/book/${bookId}/comment/new`;
+    });
+
+    document.addEventListener("DOMContentLoaded", loadComments);
 </script>
+
 
 </body>
 </html>

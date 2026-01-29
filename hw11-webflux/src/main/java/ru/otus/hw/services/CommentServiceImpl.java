@@ -3,6 +3,8 @@ package ru.otus.hw.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.otus.hw.converters.dto.CommentDtoConverter;
 import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
@@ -10,6 +12,7 @@ import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.CommentRepository;
+import ru.otus.hw.repositories.CommentRepositoryCustom;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,38 +29,37 @@ public class CommentServiceImpl implements CommentService {
 
     private final CommentDtoConverter commentDtoConverter;
 
+    private final CommentRepositoryCustom commentRepositoryCustom;
+
     @Override
     @Transactional(readOnly = true)
-    public Optional<CommentDto> findById(long id) {
-        Comment comment = commentRepository.findById(id).get();
-        return Optional.ofNullable(commentDtoConverter.toDto(comment));
+    public Mono<CommentDto> findById(long id) {
+        Mono<Comment> comment = commentRepository.findById(id);
+        return comment.map(commentDtoConverter::toDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<CommentDto> findAllBookComments(long bookId) {
-        return commentRepository.findByBookId(bookId)
-                .stream()
-                .map(commentDtoConverter::toDto)
-                .toList();
+    public Flux<CommentDto> findAllBookComments(long bookId) {
+        return commentRepositoryCustom.findByBookId(bookId).map(commentDtoConverter::toDto);
     }
 
     @Override
     @Transactional
-    public CommentDto insert(long bookId, String commentary) {
+    public Mono<CommentDto> insert(long bookId, String commentary) {
         return save(0, bookId, commentary);
     }
 
     @Override
     @Transactional
-    public CommentDto update(long id, long bookId, String commentary) {
+    public Mono<CommentDto> update(long id, long bookId, String commentary) {
         return save(id, bookId, commentary);
     }
 
     @Override
     @Transactional
-    public void deleteById(long id) {
-        commentRepository.deleteById(id);
+    public Mono<Void> deleteById(long id) {
+        return commentRepository.deleteById(id);
     }
 
     @Override
@@ -66,11 +68,15 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.deleteAllByBookId(bookId);
     }
 
-    private CommentDto save(long id, long bookId, String commentary) {
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(bookId)));
-        var comment = new Comment(id, book, commentary);
-        return commentDtoConverter.toDto(commentRepository.save(comment));
+    private Mono<CommentDto> save(long id, long bookId, String commentary) {
+        return bookRepository.findById(bookId)
+                .switchIfEmpty(Mono.error(new EntityNotFoundException("Book with id %d not found".formatted(bookId))))
+                .flatMap(book -> {
+                    Comment comment = new Comment(id, book, commentary);
+                    return commentRepository.save(comment);
+                })
+                .map(commentDtoConverter::toDto);
     }
+
 
 }

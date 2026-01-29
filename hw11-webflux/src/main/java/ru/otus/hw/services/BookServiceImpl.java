@@ -3,12 +3,17 @@ package ru.otus.hw.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.otus.hw.converters.dto.BookDtoConverter;
 import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
+import ru.otus.hw.repositories.BookRepositoryCustom;
 import ru.otus.hw.repositories.GenreRepository;
 import java.util.List;
 import java.util.Optional;
@@ -16,54 +21,66 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 public class BookServiceImpl implements BookService {
+
     private final AuthorRepository authorRepository;
 
     private final GenreRepository genreRepository;
 
     private final BookRepository bookRepository;
 
+    private final BookRepositoryCustom bookRepositoryCustom;
+
     private final BookDtoConverter bookDtoConverter;
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<BookDto> findById(long id) {
-        Book book = bookRepository.findById(id).get();
-        return Optional.ofNullable(bookDtoConverter.toDto(book));
+    public Mono<BookDto> findById(long id) {
+        return bookRepository.findById(id).map(bookDtoConverter::toDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookDto> findAll() {
-        return bookRepository.findAll()
-                .stream()
-                .map(bookDtoConverter::toDto)
-                .toList();
+    public Flux<BookDto> findAll() {
+        return bookRepositoryCustom.findAll().map(bookDtoConverter::toDto);
     }
 
     @Override
     @Transactional
-    public BookDto insert(String title, long authorId, long genreId) {
+    public Mono<BookDto> insert(String title, long authorId, long genreId) {
         return save(0, title, authorId, genreId);
     }
 
     @Override
     @Transactional
-    public BookDto update(long id, String title, long authorId, long genreId) {
+    public Mono<BookDto> update(long id, String title, long authorId, long genreId) {
         return save(id, title, authorId, genreId);
     }
 
     @Override
     @Transactional
-    public void deleteById(long id) {
-        bookRepository.deleteById(id);
+    public Mono<Void> deleteById(long id) {
+        return bookRepository.deleteById(id);
     }
 
-    private BookDto save(long id, String title, long authorId, long genreId) {
-        var author = authorRepository.findById(authorId)
-                .orElseThrow(() -> new EntityNotFoundException("Author with id %d not found".formatted(authorId)));
-        var genre = genreRepository.findById(genreId)
-                .orElseThrow(() -> new EntityNotFoundException("Genre with id %d not found".formatted(genreId)));
-        var book = new Book(id, title, author, genre, null);
-        return bookDtoConverter.toDto(bookRepository.save(book));
+    private Mono<BookDto> save(long id, String title, long authorId, long genreId) {
+        Mono<Author> authorMono = authorRepository.findById(authorId)
+                .switchIfEmpty(Mono.error(new EntityNotFoundException(
+                        "Author with id %d not found".formatted(authorId)
+                )));
+
+        Mono<Genre> genreMono = genreRepository.findById(genreId)
+                .switchIfEmpty(Mono.error(new EntityNotFoundException(
+                        "Genre with id %d not found".formatted(genreId)
+                )));
+
+        return Mono.zip(authorMono, genreMono) // ждём оба объекта
+                .flatMap(tuple -> {
+                    Author author = tuple.getT1();
+                    Genre genre = tuple.getT2();
+                    Book book = new Book(id, title, author, genre, null);
+                    return bookRepository.save(book);
+                })
+                .map(bookDtoConverter::toDto); // преобразуем Book → BookDto
     }
+
 }

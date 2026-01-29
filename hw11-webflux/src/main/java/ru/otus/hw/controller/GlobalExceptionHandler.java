@@ -28,6 +28,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ModelAndView handeNotFoundException(Exception ex) throws Exception {
         String text = "Что-то случилось, свяжитесь с психиатром если вы используете это приложение";
+        ex.printStackTrace(System.out);
         return new ModelAndView("error", "errorText", text);
     }
 

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @ShellComponent
 public class GenreCommands {
-
+/*
     private final GenreService genreService;
 
     private final GenreConverter genreConverter;
@@ -25,5 +25,5 @@ public class GenreCommands {
                 .map(genreDtoConverter::toDomain)
                 .map(genreConverter::genreToString)
                 .collect(Collectors.joining("," + System.lineSeparator()));
-    }
+    }*/
 }

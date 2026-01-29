@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"SpellCheckingInspection", "unused"})
 @RequiredArgsConstructor
 @ShellComponent
-public class BookCommands {
+public class BookCommands {/*
 
     private final BookService bookService;
 
@@ -22,7 +22,7 @@ public class BookCommands {
 
     @ShellMethod(value = "Find all books", key = "ab")
     public String findAllBooks() {
-        return bookService.findAll().stream()
+        return bookService.findAll()
                 .map(bookDtoConverter::toDomain)
                 .map(bookConverter::bookToString)
                 .collect(Collectors.joining("," + System.lineSeparator()));
@@ -54,5 +54,5 @@ public class BookCommands {
     @ShellMethod(value = "Delete book by id", key = "bdel")
     public void deleteBook(long id) {
         bookService.deleteById(id);
-    }
+    }*/
 }
