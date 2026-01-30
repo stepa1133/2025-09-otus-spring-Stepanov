@@ -9,8 +9,10 @@ import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Comment;
 import ru.otus.hw.models.Genre;
 
 @Repository
@@ -41,6 +43,27 @@ public class BookRepositoryCustom {
                 .one();
     }
 
+    public Mono<Book> save(Book book) {
+        return template.getDatabaseClient()
+                .sql("""
+                UPDATE books
+                SET title = $2,
+                    author_id = $3,
+                    genre_id = $4
+                WHERE id = $1
+            """)
+                .bind(0, book.getId())
+                .bind(1, book.getTitle())
+                .bind(2, book.getAuthor().getId())
+                .bind(3, book.getGenre().getId())
+                .fetch()
+                .rowsUpdated()
+                .flatMap(rows ->
+                        rows == 0
+                                ? Mono.error(new EntityNotFoundException("Book not found"))
+                                : Mono.just(book)
+                );
+    }
     private Book mapper(Readable selectedRecord) {
         try {
             Long id = selectedRecord.get(0, Long.class);

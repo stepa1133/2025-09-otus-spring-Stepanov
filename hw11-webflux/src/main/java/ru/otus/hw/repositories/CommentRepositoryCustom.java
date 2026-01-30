@@ -38,11 +38,11 @@ public class CommentRepositoryCustom {
     public Mono<Comment> save(Comment comment) {
         return template.getDatabaseClient()
                 .sql("INSERT INTO comments (book_id, commentary) VALUES ($1, $2)")
-                .bind(0, comment.getBook().getId())       // $1 → bookId
-                .bind(1, comment.getCommentary())         // $2 → commentary
+                .bind(0, comment.getBook().getId())
+                .bind(1, comment.getCommentary())
                 .fetch()
-                .rowsUpdated()                             // выполняем insert
-                .thenReturn(comment);                      // возвращаем исходный объект
+                .rowsUpdated()
+                .thenReturn(comment);
     }
 
 

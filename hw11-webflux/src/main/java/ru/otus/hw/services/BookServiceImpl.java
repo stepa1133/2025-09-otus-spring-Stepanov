@@ -35,7 +35,9 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional(readOnly = true)
     public Mono<BookDto> findById(long id) {
-        return bookRepository.findById(id).map(bookDtoConverter::toDto);
+        return bookRepositoryCustom.findById(id)
+                .switchIfEmpty(Mono.error(new EntityNotFoundException("Book with id %d not found".formatted(id))))
+                .map(bookDtoConverter::toDto);
     }
 
     @Override
@@ -78,7 +80,7 @@ public class BookServiceImpl implements BookService {
                     Author author = tuple.getT1();
                     Genre genre = tuple.getT2();
                     Book book = new Book(id, title, author, genre, null);
-                    return bookRepository.save(book);
+                    return bookRepositoryCustom.save(book);
                 })
                 .map(bookDtoConverter::toDto); // преобразуем Book → BookDto
     }

@@ -14,7 +14,7 @@ public class ViewController {
     }
 
     @GetMapping("/book/{id}")
-    public String getEditCurBookPage(@PathVariable long id, Model model) {
+    public String getEditCurBookPage(@PathVariable long id) {
 //        Mono<BookDto> book = bookService.findById(id);
 //        Flux<AuthorDto> allAuthors = authorService.findAll();
 //        Flux<GenreDto> allGenres = genreService.findAll();

@@ -16,7 +16,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.otus.hw.converters.dto.BookUpdateDto;
 import ru.otus.hw.dto.BookDto;
-import ru.otus.hw.models.Book;
+
 import ru.otus.hw.services.BookServiceImpl;
 
 @RestController
@@ -30,6 +30,11 @@ public class BookRestController {
         return bookService.findAll();
     }
 
+    @GetMapping("/api/books/{id}") //+
+    public Mono<BookDto> getBookById(@PathVariable("id") long id) {
+        return bookService.findById(id);
+    }
+
     @DeleteMapping("/book/{id}") //+
     public Mono<ResponseEntity<Void>> deleteBook(@PathVariable("id") long id) {
         return bookService.deleteById(id).then(Mono.just(ResponseEntity.noContent().build()));
@@ -37,9 +42,8 @@ public class BookRestController {
 
 
     @PutMapping("/book/{id}")
-    public ResponseEntity<Void> updateBook(@PathVariable Long id, @Valid @RequestBody BookUpdateDto book) {
-        bookService.update(id, book.getTitle(), book.getAuthorId(), book.getGenreId());
-        return ResponseEntity.ok().build();
+    public Mono<BookDto> updateBook(@PathVariable Long id, @Valid @RequestBody BookUpdateDto book) {
+        return bookService.update(id, book.getTitle(), book.getAuthorId(), book.getGenreId());
     }
 
     @PostMapping("/book")
