@@ -25,17 +25,17 @@ public class BookRestController {
 
     private final BookServiceImpl bookService;
 
-    @GetMapping("/api/books") //+
+    @GetMapping("/api/books")
     public Flux<BookDto> getAllBooks() {
         return bookService.findAll();
     }
 
-    @GetMapping("/api/books/{id}") //+
+    @GetMapping("/api/books/{id}")
     public Mono<BookDto> getBookById(@PathVariable("id") long id) {
         return bookService.findById(id);
     }
 
-    @DeleteMapping("/book/{id}") //+
+    @DeleteMapping("/book/{id}")
     public Mono<ResponseEntity<Void>> deleteBook(@PathVariable("id") long id) {
         return bookService.deleteById(id).then(Mono.just(ResponseEntity.noContent().build()));
     }

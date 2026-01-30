@@ -59,25 +59,21 @@
 </form>
 
 <script>
-    // bookId берём из URL: /book/{id}/comment/new
     const pathParts = window.location.pathname.split('/');
     const bookId = pathParts[2];
 
     const form = document.getElementById('add-form');
 
-    // ОТМЕНА
     document.getElementById('cancel-btn').addEventListener('click', () => {
         window.location.href = `/book/${bookId}/comment`;
     });
 
-    // СОХРАНИТЬ
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         const commentaryInput = document.getElementById('commentary');
         const commentary = commentaryInput.value.trim();
 
-        // очистка ошибок
         document.querySelectorAll('.errors').forEach(e => e.innerText = '');
         commentaryInput.classList.remove('error-field');
 
@@ -101,7 +97,6 @@
                 throw new Error('Ошибка при сохранении комментария');
             }
 
-            // успех → назад к списку
             window.location.href = `/book/${bookId}/comment`;
 
         } catch (err) {

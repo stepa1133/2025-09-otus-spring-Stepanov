@@ -15,9 +15,6 @@ import ru.otus.hw.models.Genre;
 @RequiredArgsConstructor
 public class CommentRepositoryCustom {
 
-
-    private final R2dbcEntityTemplate template;
-
     private static final String SQL_ALL = """
           SELECT c.id, c.commentary, c.book_id, b.title, b.author_id, b.genre_id, a.full_name, g.name FROM comments as c
                 JOIN books as b ON c.book_id = b.id
@@ -26,6 +23,7 @@ public class CommentRepositoryCustom {
           WHERE b.id = $1
             """;
 
+    private final R2dbcEntityTemplate template;
 
     public Flux<Comment> findByBookId(long id) {
         return template.getDatabaseClient().inConnectionMany(connection ->

@@ -8,25 +8,16 @@ import reactor.core.publisher.Mono;
 import ru.otus.hw.converters.dto.CommentDtoConverter;
 import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
-import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
-import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.BookRepositoryCustom;
 import ru.otus.hw.repositories.CommentRepository;
 import ru.otus.hw.repositories.CommentRepositoryCustom;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 
 @RequiredArgsConstructor
 @Service
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
-
-    private final BookRepository bookRepository;
 
     private final BookRepositoryCustom bookRepositoryCustom;
 

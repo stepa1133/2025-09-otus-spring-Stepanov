@@ -1,8 +1,5 @@
 package ru.otus.hw.repositories;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.r2dbc.spi.Readable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
@@ -12,20 +9,19 @@ import reactor.core.publisher.Mono;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
-import ru.otus.hw.models.Comment;
 import ru.otus.hw.models.Genre;
 
 @Repository
 @RequiredArgsConstructor
 public class BookRepositoryCustom {
-
-    private final R2dbcEntityTemplate template;
-
     private static final String SQL_ALL = """
           SELECT * FROM books as b
                 JOIN authors as a ON b.author_id = a.id
                 JOIN genres as g ON b.genre_id = g.id
             """;
+
+
+    private final R2dbcEntityTemplate template;
 
 
     public Flux<Book> findAll() {
@@ -44,6 +40,35 @@ public class BookRepositoryCustom {
     }
 
     public Mono<Book> save(Book book) {
+        if (book.getId() == null || book.getId() == 0) {
+            return insert(book);
+        } else {
+            return update(book);
+        }
+    }
+
+    public Mono<Book> insert(Book book) {
+        return template.getDatabaseClient()
+                .sql("""
+                INSERT INTO books (title, author_id, genre_id)
+                VALUES ($1, $2, $3)
+            """)
+                .bind(0, book.getTitle())
+                .bind(1, book.getAuthor().getId())
+                .bind(2, book.getGenre().getId())
+                .fetch()
+                .rowsUpdated()
+                .flatMap(rows -> {
+                    if (rows == 0) {
+                        return Mono.error(new RuntimeException("Insert failed"));
+                    }
+                    return Mono.just(book);
+                });
+    }
+
+
+    public Mono<Book> update(Book book) {
+
         return template.getDatabaseClient()
                 .sql("""
                 UPDATE books
@@ -64,6 +89,7 @@ public class BookRepositoryCustom {
                                 : Mono.just(book)
                 );
     }
+
     private Book mapper(Readable selectedRecord) {
         try {
             Long id = selectedRecord.get(0, Long.class);

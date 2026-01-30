@@ -23,7 +23,6 @@ public class BookUpdateDto {
     @NotNull(message = "Книжечка не может быть без автора")
     private Long authorId;
 
-//    @NotNull(message = "Genre id is can't be null")
     @NotNull(message = "Книжечка не может быть без жанра")
     private Long genreId;
 

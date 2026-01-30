@@ -16,7 +16,6 @@ public class Comment {
     @Id
     private Long id;
 
-//    @JoinColumn(name = "book_id")
     private Book book;
 
     private String commentary;

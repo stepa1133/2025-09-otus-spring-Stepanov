@@ -15,8 +15,6 @@ import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.BookRepositoryCustom;
 import ru.otus.hw.repositories.GenreRepository;
-import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -75,14 +73,14 @@ public class BookServiceImpl implements BookService {
                         "Genre with id %d not found".formatted(genreId)
                 )));
 
-        return Mono.zip(authorMono, genreMono) // ждём оба объекта
+        return Mono.zip(authorMono, genreMono)
                 .flatMap(tuple -> {
                     Author author = tuple.getT1();
                     Genre genre = tuple.getT2();
                     Book book = new Book(id, title, author, genre, null);
                     return bookRepositoryCustom.save(book);
                 })
-                .map(bookDtoConverter::toDto); // преобразуем Book → BookDto
+                .map(bookDtoConverter::toDto);
     }
 
 }
