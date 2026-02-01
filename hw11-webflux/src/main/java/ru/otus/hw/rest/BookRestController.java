@@ -41,12 +41,12 @@ public class BookRestController {
     }
 
 
-    @PutMapping("/book/{id}")
+    @PutMapping("/book/{id}") 
     public Mono<BookDto> updateBook(@PathVariable Long id, @Valid @RequestBody BookUpdateDto book) {
         return bookService.update(id, book.getTitle(), book.getAuthorId(), book.getGenreId());
     }
 
-    @PostMapping("/book")
+    @PostMapping("/book") 
     public Mono<ResponseEntity<BookDto>> insertBook(@Valid @RequestBody BookUpdateDto bookUpdateDto) {
         Mono<BookDto> bookMono =
                 bookService.insert(bookUpdateDto.getTitle(), bookUpdateDto.getAuthorId(), bookUpdateDto.getGenreId());

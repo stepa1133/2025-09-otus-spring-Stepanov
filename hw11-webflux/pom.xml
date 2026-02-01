@@ -13,7 +13,7 @@
     </parent>
 
     <groupId>ru.otus.hw</groupId>
-    <artifactId>hw10-spring-data-rest</artifactId>
+    <artifactId>hw11-webflux</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>spring-data-demo</name>
 
