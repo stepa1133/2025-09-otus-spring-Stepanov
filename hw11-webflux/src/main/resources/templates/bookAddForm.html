@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Add New Book</title>
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+
+        label {
+            display: inline-block;
+            width: 100px;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+
+        h3 {
+            background-image: url("../static/listmark.png");
+            background-repeat: no-repeat;
+            padding: 2px;
+            padding-left: 30px;
+        }
+
+        .errors {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .error-field {
+            border: 1px solid red;
+        }
+
+        input, select {
+            padding: 5px;
+            width: 300px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 8px 16px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Form for adding new book -->
+<form id="add-form">
+
+    <h3>Добавление новой книги:</h3>
+
+    <!-- Book Title -->
+    <div class="row">
+        <label for="book-name-input">Название книги:</label>
+        <input id="book-name-input"
+               name="title"
+               type="text"
+               placeholder="Сюда введите название книги"/>
+        <div class="errors" id="error-title"></div>
+    </div>
+
+    <!-- Author -->
+    <div class="row">
+        <label for="book-author-select">Автор:</label>
+        <select id="book-author-select" name="authorId">
+            <option value="">-- Выберите автора --</option>
+        </select>
+        <div class="errors" id="error-authorId"></div>
+    </div>
+
+    <!-- Genre -->
+    <div class="row">
+        <label for="book-genre-select">Жанр:</label>
+        <select id="book-genre-select" name="genreId">
+            <option value="">-- Выберите жанр --</option>
+        </select>
+        <div class="errors" id="error-genreId"></div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="row">
+        <button type="submit">Сохранить</button>
+        <a href="/book">
+            <button type="button">Отменить</button>
+        </a>
+    </div>
+</form>
+
+<script>
+    async function loadFormData() {
+        try {
+            const [authorsRes, genresRes] = await Promise.all([
+                fetch('/api/authors'),
+                fetch('/api/genres')
+            ]);
+
+            if (!authorsRes.ok || !genresRes.ok) {
+                throw new Error('Ошибка загрузки данных для формы');
+            }
+
+            const authors = await authorsRes.json();
+            const genres = await genresRes.json();
+
+            const authorSelect = document.getElementById('book-author-select');
+            authors.forEach(author => {
+                const option = document.createElement('option');
+                option.value = author.id;
+                option.textContent = author.fullName;
+                authorSelect.appendChild(option);
+            });
+
+            const genreSelect = document.getElementById('book-genre-select');
+            genres.forEach(genre => {
+                const option = document.createElement('option');
+                option.value = genre.id;
+                option.textContent = genre.name;
+                genreSelect.appendChild(option);
+            });
+        } catch (error) {
+            alert('Ошибка загрузки данных для формы: ' + error.message);
+        }
+    }
+
+    document.getElementById('add-form').addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const bookDto = {
+            title: form.querySelector('[name="title"]').value.trim(),
+            authorId: form.querySelector('[name="authorId"]').value
+                ? Number(form.querySelector('[name="authorId"]').value)
+                : null,
+            genreId: form.querySelector('[name="genreId"]').value
+                ? Number(form.querySelector('[name="genreId"]').value)
+                : null
+        };
+
+        document.querySelectorAll('.errors').forEach(e => e.innerText = '');
+        document.querySelectorAll('.error-field').forEach(e => e.classList.remove('error-field'));
+
+        try {
+            const response = await fetch('/book', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bookDto)
+            });
+
+            if (response.status === 400) {
+                const errors = await response.json();
+                Object.keys(errors).forEach(field => {
+                    const input = form.querySelector(`[name="${field}"]`);
+                    if (input) {
+                        input.classList.add('error-field');
+                        const errorBlock = input.closest('.row').querySelector('.errors');
+                        if (errorBlock) {
+                            errorBlock.innerText = errors[field];
+                        }
+                    }
+                });
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error('Ошибка при добавлении книги');
+            }
+
+            window.location.href = '/book';
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', loadFormData);
+</script>
+
+</body>
+</html>

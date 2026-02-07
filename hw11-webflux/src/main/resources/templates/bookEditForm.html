@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Edit book</title>
+
+    <style>
+        body {
+            padding: 50px;
+            font-family: Arial, sans-serif;
+        }
+
+        label {
+            display: inline-block;
+            width: 100px;
+        }
+
+        input:read-only {
+            background: lightgray;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+
+        .errors {
+            color: red;
+            font-size: 12px;
+        }
+
+        .error-field {
+            border: 1px solid red;
+        }
+    </style>
+</head>
+<body>
+
+<h3>Редактирование книги</h3>
+
+<form id="edit-form">
+
+    <!-- ID -->
+    <div class="row">
+        <label>ID:</label>
+        <input id="id-input" type="text" readonly>
+    </div>
+
+    <!-- Title -->
+    <div class="row">
+        <label>Название:</label>
+        <input name="title" type="text">
+        <div class="errors" id="error-title"></div>
+    </div>
+
+    <!-- Author -->
+    <div class="row">
+        <label>Автор:</label>
+        <select name="authorId">
+            <option value="">-- Выберите автора --</option>
+        </select>
+        <div class="errors" id="error-authorId"></div>
+    </div>
+
+    <!-- Genre -->
+    <div class="row">
+        <label>Жанр:</label>
+        <select name="genreId">
+            <option value="">-- Выберите жанр --</option>
+        </select>
+        <div class="errors" id="error-genreId"></div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="row">
+        <button type="submit">Сохранить</button>
+        <button type="button" onclick="goBack()">Отмена</button>
+    </div>
+
+</form>
+
+<script>
+    const bookId = location.pathname.split('/').pop();
+
+    async function loadData() {
+        const [bookRes, authorsRes, genresRes] = await Promise.all([
+            fetch(`/api/books/${bookId}`),
+            fetch(`/api/authors`),
+            fetch(`/api/genres`)
+        ]);
+
+        if (!bookRes.ok) {
+            alert('Книга не найдена');
+            return;
+        }
+
+        const book = await bookRes.json();
+        const authors = await authorsRes.json();
+        const genres = await genresRes.json();
+
+        fillForm(book, authors, genres);
+    }
+
+    function fillForm(book, authors, genres) {
+        document.getElementById('id-input').value = book.id;
+        document.querySelector('[name="title"]').value = book.title;
+
+        const authorSelect = document.querySelector('[name="authorId"]');
+        authors.forEach(author => {
+            const option = document.createElement('option');
+            option.value = author.id;
+            option.textContent = author.fullName;
+            option.selected = author.id === book.author.id;
+            authorSelect.appendChild(option);
+        });
+
+        const genreSelect = document.querySelector('[name="genreId"]');
+        genres.forEach(genre => {
+            const option = document.createElement('option');
+            option.value = genre.id;
+            option.textContent = genre.name;
+            option.selected = genre.id === book.genre.id;
+            genreSelect.appendChild(option);
+        });
+    }
+
+    document.getElementById('edit-form').addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const form = event.target;
+
+        const bookDto = {
+            id: Number(bookId),
+            title: form.title.value.trim(),
+            authorId: form.authorId.value ? Number(form.authorId.value) : null,
+            genreId: form.genreId.value ? Number(form.genreId.value) : null
+        };
+
+        form.querySelectorAll('.errors').forEach(e => e.innerText = '');
+        form.querySelectorAll('.error-field').forEach(e => e.classList.remove('error-field'));
+
+        const response = await fetch(`/book/${bookId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bookDto)
+        });
+
+        if (response.status === 400) {
+            const errors = await response.json();
+            Object.keys(errors).forEach(field => {
+                const input = form.querySelector(`[name="${field}"]`);
+                if (input) {
+                    input.classList.add('error-field');
+                    const errorBlock = document.getElementById(`error-${field}`);
+                    if (errorBlock) {
+                        errorBlock.innerText = errors[field];
+                    }
+                }
+            });
+            return;
+        }
+
+        if (!response.ok) {
+            alert('Ошибка сохранения');
+            return;
+        }
+
+        location.href = '/book';
+    });
+
+    function goBack() {
+        location.href = '/book';
+    }
+
+    document.addEventListener('DOMContentLoaded', loadData);
+</script>
+
+</body>
+</html>

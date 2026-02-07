@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Добавить комментарий</title>
+
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+        label {
+            display: inline-block;
+            width: 150px;
+        }
+        .row {
+            margin-top: 10px;
+        }
+        h3 {
+            background-image: url("../static/listmark.png");
+            background-repeat: no-repeat;
+            padding: 2px;
+            padding-left: 30px;
+        }
+        .errors {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .error-field {
+            border: 1px solid red;
+        }
+        input {
+            padding: 5px;
+            width: 300px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 8px 16px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h3>Добавьте новый комментарий:</h3>
+
+<form id="add-form">
+    <div class="row">
+        <label for="commentary">Текст комментария:</label>
+        <input id="commentary" type="text" name="commentary" placeholder="Введите комментарий сюда"/>
+        <div class="errors" id="error-commentary"></div>
+    </div>
+
+    <div class="row">
+        <button type="submit">Сохранить</button>
+        <button type="button" id="cancel-btn">Отменить</button>
+    </div>
+</form>
+
+<script>
+    const pathParts = window.location.pathname.split('/');
+    const bookId = pathParts[2];
+
+    const form = document.getElementById('add-form');
+
+    document.getElementById('cancel-btn').addEventListener('click', () => {
+        window.location.href = `/book/${bookId}/comment`;
+    });
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const commentaryInput = document.getElementById('commentary');
+        const commentary = commentaryInput.value.trim();
+
+        document.querySelectorAll('.errors').forEach(e => e.innerText = '');
+        commentaryInput.classList.remove('error-field');
+
+        try {
+            const response = await fetch(`/book/${bookId}/comment/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ commentary })
+            });
+
+            if (response.status === 400) {
+                const errors = await response.json();
+                if (errors.commentary) {
+                    commentaryInput.classList.add('error-field');
+                    document.getElementById('error-commentary').innerText = errors.commentary;
+                }
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error('Ошибка при сохранении комментария');
+            }
+
+            window.location.href = `/book/${bookId}/comment`;
+
+        } catch (err) {
+            alert(err.message);
+        }
+    });
+</script>
+
+</body>
+</html>

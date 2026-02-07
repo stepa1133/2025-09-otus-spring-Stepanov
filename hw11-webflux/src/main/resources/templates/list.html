@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Books</title>
+
+    <style>
+        body {
+            padding: 40px;
+            font-family: Arial, sans-serif;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 600px;
+        }
+
+        th, td {
+            border: 1px solid steelblue;
+            padding: 6px;
+        }
+
+        th {
+            background: #f0f6ff;
+        }
+
+        .action-form {
+            display: inline-block;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>Список книг</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Название</th>
+        <th>Автор</th>
+        <th>Жанр</th>
+        <th>Действия</th>
+    </tr>
+    </thead>
+
+    <tbody id="books-body"></tbody>
+
+    <tfoot>
+    <tr>
+        <td colspan="4">
+            Всего книг: <span id="books-count">0</span>
+        </td>
+        <td>
+            <button onclick="goToAdd()">Добавить</button>
+        </td>
+    </tr>
+    </tfoot>
+</table>
+
+<script>
+    /* ========= Реактивное состояние ========= */
+    const state = {
+        books: []
+    };
+
+    function setBooks(books) {
+        state.books = books;
+        render();
+    }
+
+    /* ========= Рендер ========= */
+    function render() {
+        const tbody = document.getElementById("books-body");
+        const count = document.getElementById("books-count");
+
+        tbody.innerHTML = "";
+        count.textContent = state.books.length;
+
+        state.books.forEach(book => {
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+                <td>${book.id}</td>
+                <td>${book.title}</td>
+                <td>${book.author.fullName}</td>
+                <td>${book.genre.name}</td>
+                <td>
+
+                    <!-- Комментарии -->
+                    <form action="/book/${book.id}/comment"
+                          method="get"
+                          class="action-form">
+                        <button type="submit">Комментарии</button>
+                    </form>
+
+                    <!-- Править -->
+                    <form action="/book/${book.id}"
+                          method="get"
+                          class="action-form">
+                        <button type="submit">Править</button>
+                    </form>
+
+                    <!-- Удалить -->
+                    <form class="action-form"
+                          onsubmit="deleteBook(event, ${book.id}, '${book.title}')">
+                        <button type="submit">Удалить</button>
+                    </form>
+
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    /* ========= API ========= */
+    async function loadBooks() {
+        const response = await fetch("/api/books");
+        setBooks(await response.json());
+    }
+
+    async function deleteBook(event, id, title) {
+        event.preventDefault();
+
+        if (!confirm(`Ну и зачем удалять книгу "${title}"?`)) return;
+
+        const response = await fetch(`/book/${id}`, { method: "DELETE" });
+
+        if (response.ok) {
+            setBooks(state.books.filter(b => b.id !== id));
+        } else {
+            alert("Ошибка удаления");
+        }
+    }
+
+    /* ========= Навигация ========= */
+    function goToAdd() {
+        location.href = "/book/new";
+    }
+
+    document.addEventListener("DOMContentLoaded", loadBooks);
+</script>
+
+</body>
+</html>
