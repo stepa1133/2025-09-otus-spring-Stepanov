@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>List of all comments</title>
+
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+        .comments {
+            border: 1px solid steelblue;
+            width: 300px;
+            border-collapse: collapse;
+        }
+
+        .comments tr td,
+        .comments th {
+            padding: 5px;
+            border: 1px solid steelblue;
+        }
+
+        .comments td:first-child,
+        .comments td:last-child {
+            width: 50px;
+            text-align: center;
+        }
+
+    </style>
+
+    <style type="text/css" th:inline="text">
+        h3 {
+            background-image: url([[@{/listmark.png}]]);
+            background-repeat: no-repeat;
+            padding: 2px;
+            padding-left: 30px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h3 th:text="#{comments-table-header}">Comments:</h3>
+
+<table class="comments">
+    <thead>
+    <tr>
+        <th th:text="#{book-field-id}">ID</th>
+        <th th:text="#{comment-field-name}">Comment</th>
+        <th th:text="#{books-table-column-action}">Action</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr th:each="comment : ${comments}">
+        <td th:text="${comment.id}">1</td>
+        <td th:text="${comment.commentary}">Kek</td>
+        <td>
+            <form th:action="@{/commentary/delete/{id}/{bookId}
+        (id=${comment.id}, bookId=${comment.book.id})}"
+                  method="post"
+                  class="delete-form"
+                  th:attr="comment-text=${comment.commentary}"
+                  onsubmit="return confirm('Точно удалять комментарий ' + this.getAttribute('comment-text') + '?');">
+                <input type="hidden" name="_method" value="DELETE"/>
+
+                <button type="submit">Удалить</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+
+    <tfoot>
+    <tr>
+        <td colspan="2" style="text-align: center; font-style: italic;">
+            Всего комментариев: <span th:text="${comments.size()}">0</span>
+        </td>
+        <td>
+            <form th:action="@{/getAddCommentaryForm}" method="get" class="action-form">
+                <input type="hidden" name="id" th:value="${bookId}"/>
+                <button type="submit"
+                        class="action-btn add-btn"
+                        th:text="#{add-new-commentary-button}">
+                    Add
+                </button>
+            </form>
+            <form th:action="@{/}" method="get" class="action-form" style="display: inline-block;">
+                <button type="submit" class="action-btn">
+                    На главную
+                </button>
+            </form>
+        </td>
+    </tr>
+    </tfoot>
+</table>
+
+</body>
+</html>
