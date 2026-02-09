@@ -10,6 +10,7 @@ public class Application {
 		SpringApplication.run(Application.class, args);
 		System.out.printf("Чтобы перейти на страницу сайта открывай: %n%s%n",
 				"http://localhost:8081\\");
+		//http://localhost:8081/h2-console
 	}
 
 }

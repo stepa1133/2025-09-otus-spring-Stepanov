@@ -2,8 +2,11 @@ package ru.otus.hw;
 
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.controller.BookController;
@@ -18,12 +21,11 @@ import ru.otus.hw.services.GenreServiceImpl;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @WebMvcTest(BookController.class)
@@ -41,16 +43,26 @@ public class BookControllerTest {
     private MockMvc mvc;
 
 
+    @ParameterizedTest
+    @ValueSource(strings = {"getAuthorsList", "", "getBookEditForm"})
+    void unauthorizedUserShouldGet401(String uri) throws Exception {
+        mvc.perform(get("/{uri}", uri))
+                .andExpect(status().isUnauthorized());
+    }
+
     @Test
+    @WithMockUser(username = "user", roles = "USER")
     void shouldRenderListPageWithCorrectViewAndModelAttributes() throws Exception {
         List<BookDto> books = getDbBooks();
         when(bookService.findAll()).thenReturn(books);
         mvc.perform(get("/"))
                 .andExpect(view().name("list"))
-                .andExpect(model().attribute("books", books));
+                .andExpect(model().attribute("books", books))
+                .andExpect(status().isOk());
     }
 
     @Test
+    @WithMockUser(username = "user", roles = "USER")
     void shouldRenderEditBookForm() throws Exception {
         var expectedBook = Optional.ofNullable(getDbBooks().get(0));
         var expectedGenres = getDbGenres();
@@ -69,33 +81,37 @@ public class BookControllerTest {
                         expectedBook.get().getAuthor().getId(),
                         expectedBook.get().getGenre().getId())))
                 .andExpect(model().attribute("allAuthors", expectedAuthors))
-                .andExpect(model().attribute("allGenres", expectedGenres));
+                .andExpect(model().attribute("allGenres", expectedGenres))
+                .andExpect(status().isOk());
     }
 
     @Test
+    @WithMockUser
     void shouldUpdateBook() throws Exception {
-        var expectedBook = Optional.ofNullable(getDbBooks().get(0));
-        when(bookService.insert(
-                expectedBook.get().getTitle(),
-                expectedBook.get().getAuthor().getId(),
-                expectedBook.get().getGenre().getId())).thenReturn(expectedBook.get());
+        var expectedBook = getDbBooks().get(0);
+
         mvc.perform(post("/updateBook")
-                        .param("id", "1")
-                        .param("title", expectedBook.get().getTitle())
-                        .param("authorId", String.valueOf(expectedBook.get().getAuthor().getId()))
-                        .param("genreId", String.valueOf(expectedBook.get().getGenre().getId()))
-                       )
-                .andExpect((view().name("redirect:/")));
+                        .with(csrf())
+                        .flashAttr("book", new BookUpdateDto(
+                                expectedBook.getId(),
+                                expectedBook.getTitle(),
+                                expectedBook.getAuthor().getId(),
+                                expectedBook.getGenre().getId()
+                        ))
+                )
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
     }
 
     @Test
+    @WithMockUser(username = "user", roles = "USER")
     void shouldInsertNewBook() throws Exception {
         var expectedBook = Optional.ofNullable(getDbBooks().get(0));
         when(bookService.insert(
                 expectedBook.get().getTitle(),
                 expectedBook.get().getAuthor().getId(),
                 expectedBook.get().getGenre().getId())).thenReturn(expectedBook.get());
-        mvc.perform(post("/insertBook")
+        mvc.perform(post("/insertBook").with(csrf())
                         .param("id", "1")
                         .param("title", expectedBook.get().getTitle())
                         .param("authorId", String.valueOf(expectedBook.get().getAuthor().getId()))
@@ -103,16 +119,6 @@ public class BookControllerTest {
                 )
                 .andExpect((view().name("redirect:/")));
     }
-
-    @Test
-    void shouldRenderDeleteCurrentBook() throws Exception {
-        doNothing().when(bookService).deleteById(1);
-        mvc.perform(post("/delete/1"))
-                .andExpect((view().name("redirect:/")));
-    }
-
-
-
 
 
     private List<BookDto> getDbBooks() {

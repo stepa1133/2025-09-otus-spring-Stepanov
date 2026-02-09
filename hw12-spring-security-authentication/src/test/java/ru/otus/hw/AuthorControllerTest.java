@@ -2,6 +2,7 @@ package ru.otus.hw;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.controller.AuthorController;
@@ -13,8 +14,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @WebMvcTest(AuthorController.class)
@@ -31,11 +31,20 @@ public class AuthorControllerTest {
 
 
     @Test
+    void unauthorizedUserShouldGet401() throws Exception {
+        mvc.perform(get("/getAuthorsList"))
+                .andExpect(status().isUnauthorized());
+    }
+
+
+    @Test
+    @WithMockUser
     void shouldRenderListPageWithCorrectViewAndModelAttributes() throws Exception {
         when(service.findAll()).thenReturn(authors);
         mvc.perform(get("/getAuthorsList"))
                 .andExpect(view().name("authorsList"))
-                .andExpect(model().attribute("authors", authors));
+                .andExpect(model().attribute("authors", authors))
+                .andExpect(status().isOk());
     }
 
 }
