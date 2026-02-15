@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.LibraryUser;
 import ru.otus.hw.repositories.LibraryUserRepository;
 
@@ -22,7 +23,7 @@ public class LibraryUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         LibraryUser libraryUser = repository.findByLogin(username);
         if (libraryUser == null) {
-            throw new UsernameNotFoundException(username);
+            throw new EntityNotFoundException("User with name %s not found".formatted(username));
         }
         return new User(libraryUser.getLogin(),
                         libraryUser.getPassword(), List.of(new SimpleGrantedAuthority(libraryUser.getRole())));

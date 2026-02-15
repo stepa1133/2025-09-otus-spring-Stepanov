@@ -25,17 +25,12 @@ public class SecurityConfiguration {
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .authorizeHttpRequests((authorize) -> authorize
-//                                .requestMatchers("/").permitAll()
                                .requestMatchers("/h2-console/**").permitAll()
-//                        .requestMatchers("/authenticated", "/success").authenticated()
-                                .anyRequest().authenticated()
+                               .anyRequest().authenticated()
                 )
-//                .anonymous(a -> a.principal(new AnonimusUD()).authorities("ROLE_ANONYMOUS"))
-//                .httpBasic(Customizer.withDefaults())
-               // .formLogin(Customizer.withDefaults())
+
                 .formLogin(fm -> fm
-                        .defaultSuccessUrl("/")
-                        /*.failureForwardUrl("/fail")*/)
+                        .defaultSuccessUrl("/"))
                 .rememberMe(rm -> rm.key("AnyKey")
                         .tokenValiditySeconds(2000));
         return http.build();
