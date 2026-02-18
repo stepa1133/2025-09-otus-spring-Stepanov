@@ -28,7 +28,6 @@ public class SecurityConfiguration {
                                .requestMatchers("/h2-console/**").permitAll()
                                .anyRequest().authenticated()
                 )
-
                 .formLogin(fm -> fm
                         .defaultSuccessUrl("/"))
                 .rememberMe(rm -> rm.key("AnyKey")
@@ -44,7 +43,7 @@ public class SecurityConfiguration {
 
     public static void main(String[] args) {
         PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        String [] arrPasswords = new String[] {"admin", "tests"};
+        String [] arrPasswords = new String[] {"password", "password"};
         Arrays.stream(arrPasswords).map(passwordEncoder::encode).forEach(System.out::println);
     }
 
