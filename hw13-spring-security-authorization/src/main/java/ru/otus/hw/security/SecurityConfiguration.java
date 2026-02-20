@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,23 +20,25 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .headers(headers -> headers
-                        .frameOptions(frame -> frame.disable())
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+                .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/").hasAnyRole("FREEREADER", "READER", "EDITOR")
+                        .requestMatchers("/getAuthorsList",
+                                "/getGenresList",
+                                "/getCommentsList",
+                                "/getAddCommentaryForm",
+                                "/insertComment")
+                        .hasAnyRole("READER", "EDITOR")
+                        .requestMatchers("/**").hasRole("EDITOR")
+                        .anyRequest().authenticated()
                 )
-                .sessionManagement((session) -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
-                .authorizeHttpRequests((authorize) -> authorize
-                               .requestMatchers("/h2-console/**").permitAll()
-                               .anyRequest().authenticated()
-                )
-                .formLogin(fm -> fm
-                        .defaultSuccessUrl("/"))
-                .rememberMe(rm -> rm.key("AnyKey")
-                        .tokenValiditySeconds(2000));
+                .formLogin(fm -> fm.defaultSuccessUrl("/"))
+                .rememberMe(rm -> rm.key("AnyKey").tokenValiditySeconds(2000));
         return http.build();
     }
 
-    @SuppressWarnings("deprecation")
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();

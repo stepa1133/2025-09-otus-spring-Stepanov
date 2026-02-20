@@ -1,6 +1,8 @@
 package ru.otus.hw.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.converters.dto.BookDtoConverter;
@@ -24,6 +26,11 @@ public class BookServiceImpl implements BookService {
 
     private final BookDtoConverter bookDtoConverter;
 
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        System.out.println(">>> BookServiceImpl class: " + this.getClass().getName());
+    }
+
     @Override
     @Transactional(readOnly = true)
     public Optional<BookDto> findById(long id) {
@@ -33,11 +40,9 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookDto> findAll() {
-        return bookRepository.findAll()
-                .stream()
-                .map(bookDtoConverter::toDto)
-                .toList();
+    @PostFilter("hasPermission(filterObject, 'READ')")
+    public List<Book> findAll() {
+        return bookRepository.findAll();
     }
 
     @Override

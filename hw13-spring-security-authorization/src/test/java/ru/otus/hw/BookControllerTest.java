@@ -54,7 +54,7 @@ public class BookControllerTest {
     @WithMockUser(username = "user", roles = "USER")
     void shouldRenderListPageWithCorrectViewAndModelAttributes() throws Exception {
         List<BookDto> books = getDbBooks();
-        when(bookService.findAll()).thenReturn(books);
+      //  when(bookService.findAll()).thenReturn(books);
         mvc.perform(get("/"))
                 .andExpect(view().name("list"))
                 .andExpect(model().attribute("books", books))
