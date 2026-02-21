@@ -1,7 +1,6 @@
 package ru.otus.hw.services;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,11 +24,6 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
 
     private final BookDtoConverter bookDtoConverter;
-
-    @jakarta.annotation.PostConstruct
-    public void init() {
-        System.out.println(">>> BookServiceImpl class: " + this.getClass().getName());
-    }
 
     @Override
     @Transactional(readOnly = true)

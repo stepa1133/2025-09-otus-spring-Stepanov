@@ -53,9 +53,9 @@ INSERT INTO acl_object_identity (id, object_id_class, object_id_identity, parent
 (17, 4, 7, NULL, 1, 0);
 
 INSERT INTO acl_entry (id, acl_object_identity, ace_order, sid, mask, granting, audit_success, audit_failure) VALUES
-( 1,  1, 1, 1, 16, 1, 1, 1),
-( 2,  2, 1, 1,  1, 1, 1, 1),-- < -- ВИЖУ ТОЛЬКО ЭТУ КНИГУ
-( 3,  3, 1, 1, 3, 1, 1, 1),
+( 1,  1, 1, 1, 31, 1, 1, 1),
+( 2,  2, 1, 1, 31, 1, 1, 1),
+( 3,  3, 1, 1, 31, 1, 1, 1),
 ( 4,  4, 1, 1, 31, 1, 1, 1),
 
 ( 5,  5, 1, 1, 31, 1, 1, 1),

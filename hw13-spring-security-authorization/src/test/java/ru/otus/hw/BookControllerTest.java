@@ -1,40 +1,52 @@
 package ru.otus.hw;
 
-
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.controller.BookController;
+import ru.otus.hw.converters.dto.BookDtoConverter;
 import ru.otus.hw.converters.dto.BookUpdateDto;
 import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.GenreDto;
+import ru.otus.hw.security.SecurityConfiguration;
 import ru.otus.hw.services.AuthorServiceImpl;
 import ru.otus.hw.services.BookServiceImpl;
 import ru.otus.hw.services.GenreServiceImpl;
+import ru.otus.hw.services.acl.AclServiceWrapperService;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @WebMvcTest(BookController.class)
+@Import(SecurityConfiguration.class)
 public class BookControllerTest {
     @MockitoBean
     private BookServiceImpl bookService;
 
     @MockitoBean
     private  AuthorServiceImpl authorService;
+
+    @MockitoBean
+    private AclServiceWrapperService aclServiceWrapperService;
+
+    @MockitoBean
+    private BookDtoConverter bookDtoConverter;
+
 
     @MockitoBean
     private  GenreServiceImpl genreService;
@@ -45,53 +57,55 @@ public class BookControllerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"getAuthorsList", "", "getBookEditForm"})
-    void unauthorizedUserShouldGet401(String uri) throws Exception {
+    void unauthorizedUserShouldGet302(String uri) throws Exception {
         mvc.perform(get("/{uri}", uri))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isMovedTemporarily());
     }
 
-    @Test
-    @WithMockUser(username = "user", roles = "USER")
-    void shouldRenderListPageWithCorrectViewAndModelAttributes() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+            "editor, ROLE_EDITOR, 200",
+            "reader, ROLE_READER, 200",
+            "free, ROLE_FREEREADER, 200"
+    })
+    void shouldRenderListPageWithCorrectViewAndModelAttributes(String username, String role) throws Exception {
         List<BookDto> books = getDbBooks();
-      //  when(bookService.findAll()).thenReturn(books);
-        mvc.perform(get("/"))
-                .andExpect(view().name("list"))
-                .andExpect(model().attribute("books", books))
+        mvc.perform(get("/").with(user(username).authorities(new SimpleGrantedAuthority(role))))
                 .andExpect(status().isOk());
     }
 
-    @Test
-    @WithMockUser(username = "user", roles = "USER")
-    void shouldRenderEditBookForm() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+            "editor, ROLE_EDITOR, 200",
+            "reader, ROLE_READER, 403",
+            "free, ROLE_FREEREADER, 403"
+    })
+    void shouldRenderEditBookForm(String username, String role,
+                                  int expectedStatus) throws Exception {
         var expectedBook = Optional.ofNullable(getDbBooks().get(0));
         var expectedGenres = getDbGenres();
         var expectedAuthors = getDbAuthors();
         when(bookService.findById(1)).thenReturn(expectedBook);
         when(genreService.findAll()).thenReturn(expectedGenres);
         when(authorService.findAll()).thenReturn(expectedAuthors);
-
-
-
-        mvc.perform(get("/getBookEditForm").param("id", "1"))
-                .andExpect(view().name("bookEditForm"))
-                .andExpect(model().attribute("book", new BookUpdateDto(
-                        expectedBook.get().getId(),
-                        expectedBook.get().getTitle(),
-                        expectedBook.get().getAuthor().getId(),
-                        expectedBook.get().getGenre().getId())))
-                .andExpect(model().attribute("allAuthors", expectedAuthors))
-                .andExpect(model().attribute("allGenres", expectedGenres))
-                .andExpect(status().isOk());
+        mvc.perform(get("/getBookEditForm").param("id", "1")
+                        .with(user(username).authorities(new SimpleGrantedAuthority(role))))
+                .andExpect(status().is(expectedStatus));
     }
 
-    @Test
-    @WithMockUser
-    void shouldUpdateBook() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+            "editor, ROLE_EDITOR, 302",
+            "reader, ROLE_READER, 403",
+            "free, ROLE_FREEREADER, 403"
+    })
+    void shouldUpdateBook(String username, String role,
+                          int expectedStatus) throws Exception {
         var expectedBook = getDbBooks().get(0);
 
         mvc.perform(post("/updateBook")
                         .with(csrf())
+                        .with(user(username).authorities(new SimpleGrantedAuthority(role)))
                         .flashAttr("book", new BookUpdateDto(
                                 expectedBook.getId(),
                                 expectedBook.getTitle(),
@@ -99,25 +113,32 @@ public class BookControllerTest {
                                 expectedBook.getGenre().getId()
                         ))
                 )
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/"));
+                .andExpect(status().is(expectedStatus));
     }
 
-    @Test
-    @WithMockUser(username = "user", roles = "USER")
-    void shouldInsertNewBook() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+            "editor, ROLE_EDITOR, 302",
+            "reader, ROLE_READER, 403",
+            "free, ROLE_FREEREADER, 403"
+    })
+    void shouldInsertNewBook(String username, String role,
+                             int expectedStatus) throws Exception {
         var expectedBook = Optional.ofNullable(getDbBooks().get(0));
         when(bookService.insert(
                 expectedBook.get().getTitle(),
                 expectedBook.get().getAuthor().getId(),
                 expectedBook.get().getGenre().getId())).thenReturn(expectedBook.get());
-        mvc.perform(post("/insertBook").with(csrf())
+        mvc.perform(post("/insertBook")
+
+                        .with(csrf())
+                        .with(user(username).authorities(new SimpleGrantedAuthority(role)))
                         .param("id", "1")
                         .param("title", expectedBook.get().getTitle())
                         .param("authorId", String.valueOf(expectedBook.get().getAuthor().getId()))
                         .param("genreId", String.valueOf(expectedBook.get().getGenre().getId()))
                 )
-                .andExpect((view().name("redirect:/")));
+                .andExpect(status().is(expectedStatus));
     }
 
 

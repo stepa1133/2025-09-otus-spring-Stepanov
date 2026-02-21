@@ -3,7 +3,6 @@ package ru.otus.hw.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.acls.domain.BasePermission;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,7 +19,6 @@ import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.GenreDto;
 import ru.otus.hw.services.AuthorServiceImpl;
 import ru.otus.hw.services.BookService;
-import ru.otus.hw.services.BookServiceImpl;
 import ru.otus.hw.services.GenreServiceImpl;
 import ru.otus.hw.services.acl.AclServiceWrapperService;
 

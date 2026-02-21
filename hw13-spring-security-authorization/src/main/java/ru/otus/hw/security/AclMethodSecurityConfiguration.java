@@ -13,12 +13,14 @@ public class AclMethodSecurityConfiguration extends GlobalMethodSecurityConfigur
 
     private final AclService aclService;
 
+    @Autowired
+    private MethodSecurityExpressionHandler defaultMethodSecurityExpressionHandler;
+
+
     public AclMethodSecurityConfiguration(AclService aclService) {
         this.aclService = aclService;
     }
 
-    @Autowired
-    MethodSecurityExpressionHandler defaultMethodSecurityExpressionHandler;
 
     @Override
     protected MethodSecurityExpressionHandler createExpressionHandler() {
