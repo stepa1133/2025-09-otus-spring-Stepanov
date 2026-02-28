@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Добавить комментарий</title>
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+        label {
+            display: inline-block;
+            width: 150px;
+        }
+        .row {
+            margin-top: 10px;
+        }
+        h3 {
+            background-image: url("../static/listmark.png");
+            background-repeat: no-repeat;
+            padding: 2px;
+            padding-left: 30px;
+        }
+        .errors {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .error-field {
+            border: 1px solid red;
+        }
+        input, select {
+            padding: 5px;
+            width: 300px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 8px 16px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<form id="add-form" th:action="@{/insertComment}" th:method="post" th:object="${comment}">
+    <input type="hidden" th:field="*{bookId}"/>
+    <input type="hidden" th:field="*{id}"/>
+
+    <h3>Добавьте новый комментарий:</h3>
+
+    <div class="row">
+        <label for="commentary-input">Текст комментария:</label>
+        <input id="commentary-input"
+               type="text"
+               th:field="*{commentary}"
+               th:classappend="${#fields.hasErrors('commentary')} ? 'error-field' : ''"
+               placeholder="Введите комментарий сюда"/>
+        <div class="errors"
+             th:if="${#fields.hasErrors('commentary')}"
+             th:errors="*{commentary}">
+        </div>
+    </div>
+
+    <div class="row">
+        <button type="submit">Сохранить</button>
+        <a th:href="@{/getCommentsList(id=${comment.bookId})}">
+            <button type="button">Отменить</button>
+        </a>
+    </div>
+</form>
+
+</body>
+</html>
