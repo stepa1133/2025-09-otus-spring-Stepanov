@@ -1,7 +1,7 @@
 spring:
   batch:
     job:
-      enabled: true
+      enabled: false
 
   shell:
     interactive:
@@ -33,7 +33,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: true
+#    show-sql: true
     properties:
       hibernate:
         format_sql: true

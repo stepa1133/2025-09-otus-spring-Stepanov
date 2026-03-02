@@ -21,7 +21,9 @@ import java.util.Map;
 @Configuration
 @RequiredArgsConstructor
 public class BooksStepConfig {
+
     private static final int CHUNK_SIZE = 5;
+
     private final Map<String, Sort.Direction> sortsMap = Collections.singletonMap("id", Sort.Direction.ASC);
 
     private final JobRepository jobRepository;

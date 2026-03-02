@@ -11,12 +11,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
-import ru.otus.hw.config.authors.AuthorProcessor;
-import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Comment;
-import ru.otus.hw.models.mongo.MongoAuthor;
 import ru.otus.hw.models.mongo.MongoComment;
-import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.CommentRepository;
 
 import java.util.Collections;
