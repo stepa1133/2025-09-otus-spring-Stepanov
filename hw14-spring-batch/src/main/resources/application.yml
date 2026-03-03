@@ -40,13 +40,13 @@ spring:
 
   data:
     mongodb:
-      database: library   # ВАЖНО: host и port НЕ указываем
+      database: library
       host: localhost
       port: 27017
 
 mongock:
-  #runner-type: "ApplicationRunner" # default
-  runner-type: InitializingBean
+  runner-type: "ApplicationRunner" # default
+  #runner-type: InitializingBean
   change-logs-scan-package:
     - ru.otus.hw.mongock.changelog
   mongo-db:
