@@ -10,7 +10,7 @@ import java.util.List;
 @MessagingGateway
 public interface FarmGateway {
 
-    @Gateway(requestChannel = "orderChannel")
+    @Gateway(requestChannel = "orderChannel", replyChannel = "resultChannel")
     List<Product> makeOrder(Order order);
 
 }

@@ -1,8 +1,8 @@
 package ru.otus.integration.domain;
 
 public class Product {
-
     private ProductType type;
+
     private int quantity;
 
     public Product(ProductType type, int quantity) {

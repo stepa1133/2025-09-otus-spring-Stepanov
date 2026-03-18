@@ -8,7 +8,9 @@ import ru.otus.integration.service.OrderService;
 @Component
 @RequiredArgsConstructor
 public class ApplicationRunner implements CommandLineRunner {
+
     private final OrderService orderService;
+
     @Override
     public void run(String... args) throws Exception {
         orderService.generateOrders();

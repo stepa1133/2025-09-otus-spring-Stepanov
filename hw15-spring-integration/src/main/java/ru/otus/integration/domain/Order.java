@@ -5,6 +5,7 @@ import java.util.Map;
 public class Order {
 
     private String storeName;
+
     private Map<ProductType, Integer> items;
 
     public Order(String storeName, Map<ProductType, Integer> items) {
