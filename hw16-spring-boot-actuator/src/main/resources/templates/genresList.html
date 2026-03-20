@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>List of all genres</title>
+
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+        .genres {
+            border: 1px solid steelblue;
+            width: 300px;
+            border-collapse: collapse;
+        }
+
+        .genres tr td,
+        .genres th {
+            padding: 5px;
+            border: 1px solid steelblue;
+        }
+
+        .genres td:first-child,
+        .genres td:last-child {
+            width: 50px;
+            text-align: center;
+        }
+
+    </style>
+
+    <style type="text/css" th:inline="text">
+        h3 {
+            background-image: url([[@{/listmark.png}]]);
+            background-repeat: no-repeat;
+            padding: 2px;
+            padding-left: 30px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h3 th:text="Жанры">Жанры:</h3>
+
+<table class="genres">
+    <thead>
+    <tr>
+        <th th:text="Итендификатор">ID</th>
+        <th th:text="Название">Жанр</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr th:each="genre : ${genres}">
+        <td th:text="${genre.id}">1</td>
+        <td th:text="${genre.name}">Kek</td>
+    </tr>
+    </tbody>
+
+    <tfoot>
+    <tr>
+        <td colspan="2" style="text-align: center; font-style: italic;">
+            Всего авторов: <span th:text="${genres.size()}">0</span>
+        </td>
+        <td>
+            <form th:action="@{/book}" method="get" class="action-form" style="display: inline-block;">
+                <button type="submit" class="action-btn">
+                    На главную
+                </button>
+            </form>
+        </td>
+    </tr>
+    </tfoot>
+</table>
+
+</body>
+</html>
