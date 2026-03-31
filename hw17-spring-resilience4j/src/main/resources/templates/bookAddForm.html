@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Add New Book</title>
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+
+        label {
+            display: inline-block;
+            width: 100px;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+
+        h3 {
+            background-image: url("../static/listmark.png");
+            background-repeat: no-repeat;
+            padding: 2px;
+            padding-left: 30px;
+        }
+
+        .errors {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .error-field {
+            border: 1px solid red;
+        }
+
+        input, select {
+            padding: 5px;
+            width: 300px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 8px 16px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+    </style>
+
+    <style type="text/css" th:inline="text">
+        [[h3]] {
+            background-image: url([[@{/listmark.png}]]);
+            background-repeat: no-repeat;
+            padding: 2px;
+            padding-left: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Form for adding new book -->
+<form id="add-form" th:action="@{/insertBook}" th:method="post" th:object="${book}">
+
+    <h3>Добавление новой книги:</h3>
+
+    <div class="row">
+        <label for="book-name-input">Название книги:</label>
+        <input id="book-name-input"
+               name="title"
+               type="text"
+               placeholder="Сюда введите название книги"/>
+        <div class="errors"></div>
+    </div>
+
+    <div class="row">
+        <label for="book-author-select">Автор:</label>
+        <select id="book-author-select" name="authorId">
+            <option value="">-- Выберете автора --</option>
+            <option th:each="author : ${allAuthors}"
+                    th:value="${author.id}"
+                    th:text="${author.fullName}">
+            </option>
+        </select>
+        <div class="errors"></div>
+    </div>
+
+    <div class="row">
+        <label for="book-genre-select">Жанр:</label>
+        <select id="book-genre-select" name="genreId">
+            <option value="">-- Выберете жанр --</option>
+            <option th:each="genre : ${allGenres}"
+                    th:value="${genre.id}"
+                    th:text="${genre.name}">
+            </option>
+        </select>
+        <div class="errors"></div>
+    </div>
+
+    <div class="row">
+        <button type="submit">Сохранить</button>
+        <a th:href="@{/book}">
+            <button type="button">Отменить</button>
+        </a>
+    </div>
+</form>
+
+<script>
+    document.getElementById('add-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const form = event.target;
+
+        const bookDto = {
+            title: form.querySelector('[name="title"]').value,
+            authorId: form.querySelector('[name="authorId"]').value
+                ? Number(form.querySelector('[name="authorId"]').value)
+                : null,
+            genreId: form.querySelector('[name="genreId"]').value
+                ? Number(form.querySelector('[name="genreId"]').value)
+                : null
+        };
+
+        document.querySelectorAll('.errors').forEach(e => e.innerText = '');
+        document.querySelectorAll('.error-field').forEach(e => e.classList.remove('error-field'));
+
+        fetch('/book', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bookDto)
+        })
+            .then(async response => {
+                if (response.status === 400) {
+                    const errors = await response.json();
+                    Object.keys(errors).forEach(field => {
+                        const input = form.querySelector(`[name="${field}"]`);
+                        if (input) {
+                            input.classList.add('error-field');
+                            const errorBlock = input.closest('.row').querySelector('.errors');
+                            if (errorBlock) {
+                                errorBlock.innerText = errors[field];
+                            }
+                        }
+                    });
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Ошибка при добавлении книги');
+                }
+
+                window.location.href = '/book';
+            })
+            .catch(error => {
+                alert(error.message);
+            });
+    });
+</script>
+
+</body>
+</html>
