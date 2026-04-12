@@ -13,7 +13,6 @@ import ru.otus.hw.models.Genre;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor

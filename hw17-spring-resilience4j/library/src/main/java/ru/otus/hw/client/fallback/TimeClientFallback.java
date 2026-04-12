@@ -10,7 +10,7 @@ public class TimeClientFallback implements TimeClient {
     public TimeResponse getTime() {
         System.out.println("🔥 FALLBACK СРАБОТАЛ");
         TimeResponse response = new TimeResponse();
-        response.setTimestamp( System.currentTimeMillis());
+        response.setTimestamp(System.currentTimeMillis());
         return response;
     }
 

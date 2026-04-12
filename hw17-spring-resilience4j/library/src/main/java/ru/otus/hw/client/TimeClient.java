@@ -1,7 +1,7 @@
 package ru.otus.hw.client;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import ru.otus.hw.client.fallback.TimeClientFallback;
 import ru.otus.hw.models.time.TimeResponse;
 
@@ -18,7 +18,6 @@ public interface TimeClient {
 
     @GetMapping("/getTimeRetry")
     TimeResponse getTimeRetry();
-
 
     @GetMapping("/circuitbreaker/clear")
     void sendClearCircuitBreaker();

@@ -9,9 +9,8 @@ import org.springframework.stereotype.Service;
 import ru.otus.hw.client.TimeClient;
 import ru.otus.hw.models.time.TimeResponse;
 
-
 import java.sql.Time;
-
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Slf4j
@@ -21,14 +20,14 @@ public class TimeService {
     private final CircuitBreakerRegistry registry;
 
     private final TimeClient timeClient;
+
     public String getCurrentTime() {
-            TimeResponse time = timeClient.getTime();
-            return new Time(time.getTimestamp()).toString();
+        TimeResponse time = timeClient.getTime();
+        return new Time(time.getTimestamp()).toString();
     }
 
     @Retry(name = "timeApi")
     public String getTimeRetry() {
-
         TimeResponse time = timeClient.getTimeRetry();
         return new Time(time.getTimestamp()).toString();
     }
@@ -39,62 +38,71 @@ public class TimeService {
 
         for (int i = 0; i < 15; i++) {
             time = timeClient.getTimeSlow();
-            log.info("[Time limiter] \uD83D\uDD01 new attempt {}, {}", i+1, cb.getState());
+            log.info("[Time limiter] \uD83D\uDD01 new attempt {}, {}", i + 1, cb.getState());
 
         }
         return new Time(time.getTimestamp()).toString();
     }
 
     public String getTimeCircuitBreaker() throws Exception {
-        TimeResponse time = null;
-        timeClient.sendClearCircuitBreaker();
-        CircuitBreaker cb = registry.circuitBreaker("timeApi");
-        boolean stateOpen = false;
-        int sendedRequestToOtherService = 0;
-// 1
-// Посылаем запросы, до тех пор пока state не сменится CLOSED -> OPEN
-        for (int i = 0; i < 10; i++) {
-            if (cb.getState() == CircuitBreaker.State.OPEN) {
-                log.info("[circuit breaker] is OPEN → stop calling. Count attempts is {}", i);
-                stateOpen = true;
-                break;
-            }
+        timeClient.sendClearCircuitBreaker(); // обнуляем счетчик на "соседнем" сервисе. Первые 4 запроса - вернут 500
+        AtomicInteger sendedRequestToOtherService = new AtomicInteger(0);
 
-            time = timeClient.getTimeCircuitBreaker();
-            sendedRequestToOtherService++;
-            log.info("[circuit breaker] \uD83D\uDD01 new attempt {}", sendedRequestToOtherService);
-        }
-// 2
-// Ждём, до тех пор пока state не сменится когда OPEN -> HALF_OPEN
-// Все запросы в этом стейте не будут отправляться в сторонний сервис,
-// а сразу отработает логика fallback (до истечении времени waitDurationInOpenState)
+        sendRequestsWhileCBOpen(sendedRequestToOtherService);
+        waitWhileCBChangeFromOpenToHalfOpen(sendedRequestToOtherService);
+        countSuccessRequestsToChangeCBFromHalfOpenToClosed(sendedRequestToOtherService);
 
-        if (stateOpen) {
-            Thread.sleep(2000);
-            time = timeClient.getTimeCircuitBreaker();
-            sendedRequestToOtherService++;
-            log.info("[circuit breaker] \uD83D\uDD01 new attempt {}", sendedRequestToOtherService);
-            if (cb.getState() == CircuitBreaker.State.HALF_OPEN) {
-                log.info("[circuit breaker]!!! wait HALF_OPEN, current State HALF_OPEN");
-            }
-        }
-
-// 3
-// Считаем кол-во успешных запросов для перехода HALF_OPEN -> CLOSED
-        int attemptsHalfOpenToClosed = 1;
-        while (cb.getState() == CircuitBreaker.State.HALF_OPEN) {
-            sendedRequestToOtherService++;
-            attemptsHalfOpenToClosed ++;
-            log.info("[circuit breaker] \uD83D\uDD01 new attempt {}, cur state {}", sendedRequestToOtherService, cb.getState());
-            time = timeClient.getTimeCircuitBreaker();
-            Thread.sleep(500);
-        }
-        log.info("[circuit breaker] after {} requests state changed from HALF_OPEN to {}", attemptsHalfOpenToClosed, cb.getState());
-
-
+        TimeResponse time = timeClient.getTimeCircuitBreaker();
         return new Time(time.getTimestamp()).toString();
     }
 
+    // Посылаем запросы, до тех пор пока state не сменится CLOSED -> OPEN
+    private void sendRequestsWhileCBOpen(AtomicInteger sendedRequestToOtherService) {
+        CircuitBreaker cb = registry.circuitBreaker("timeApi");
+        for (int i = 0; i < 10; i++) {
+            if (cb.getState() == CircuitBreaker.State.OPEN) {
+                log.info("[circuit breaker] is OPEN → stop calling. Count attempts is {}", i);
+                break;
+            }
+            timeClient.getTimeCircuitBreaker();
+            sendedRequestToOtherService.incrementAndGet();
+            log.info("[circuit breaker] \uD83D\uDD01 new attempt {}", sendedRequestToOtherService);
+        }
+    }
 
+
+    // Ждём, до тех пор пока state не сменится когда OPEN -> HALF_OPEN
+// Все запросы в этом стейте не будут отправляться в сторонний сервис,
+// а сразу отработает логика fallback (до истечении времени waitDurationInOpenState)
+    private void waitWhileCBChangeFromOpenToHalfOpen(AtomicInteger sendedRequestToOtherService) throws Exception {
+        CircuitBreaker cb = registry.circuitBreaker("timeApi");
+        Thread.sleep(2000);
+        sendedRequestToOtherService.incrementAndGet();
+        timeClient.getTimeCircuitBreaker();
+        log.info("[circuit breaker] \uD83D\uDD01 new attempt {}", sendedRequestToOtherService);
+        if (cb.getState() == CircuitBreaker.State.HALF_OPEN) {
+            log.info("[circuit breaker]!!! wait HALF_OPEN, current State HALF_OPEN");
+        }
+    }
+
+    // Считаем кол-во успешных запросов для перехода HALF_OPEN -> CLOSED
+    private void countSuccessRequestsToChangeCBFromHalfOpenToClosed(AtomicInteger sendedRequestToOtherService)
+            throws Exception {
+        CircuitBreaker cb = registry.circuitBreaker("timeApi");
+        int attemptsHalfOpenToClosed = 1;
+        while (cb.getState() == CircuitBreaker.State.HALF_OPEN) {
+            sendedRequestToOtherService.incrementAndGet();
+            attemptsHalfOpenToClosed++;
+            log.info("[circuit breaker] \uD83D\uDD01 new attempt {}, cur state {}",
+                    sendedRequestToOtherService, cb.getState());
+            timeClient.getTimeCircuitBreaker();
+            Thread.sleep(500);
+        }
+        log.info("[circuit breaker] after {} requests state changed from HALF_OPEN to {}",
+                attemptsHalfOpenToClosed, cb.getState());
 
     }
+
+
+
+}

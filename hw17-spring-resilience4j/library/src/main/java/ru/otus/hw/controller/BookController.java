@@ -37,8 +37,10 @@ public class BookController {
         model.addAttribute("time", curTime);
         return "list";
     }
+
 // http://127.0.0.1:8081/bookcb
     @GetMapping("/bookcb")
+
     public String getListBooksPageCb(Model model) throws Exception {
         List<BookDto> books = bookService.findAll();
         var curTime = timeService.getTimeCircuitBreaker();
@@ -48,6 +50,7 @@ public class BookController {
     }
 
 // http://127.0.0.1:8081/bookslow
+
     @GetMapping("/bookslow")
     public String getListBooksPageSlow(Model model) throws Exception {
         List<BookDto> books = bookService.findAll();
@@ -57,7 +60,8 @@ public class BookController {
         return "list";
     }
 
-    // http://127.0.0.1:8081/bookretry
+// http://127.0.0.1:8081/bookretry
+
     @GetMapping("/bookretry")
     public String getListBooksPageRetry(Model model) throws Exception {
         List<BookDto> books = bookService.findAll();

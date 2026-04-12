@@ -20,19 +20,16 @@ public class TestController {
 
     private AtomicInteger counter = new AtomicInteger(0);
 
-
     @GetMapping("/getTime")
     public ResponseEntity<TimeResponse> getTime() {
         return ResponseEntity.status(OK).body(timeService.getCurrentTime());
     }
 
-    // ❌ всегда 500
     @GetMapping("/error")
     public ResponseEntity<String> error() {
         return ResponseEntity.status(500).body("Internal error");
     }
 
-    // ⏳ долгий ответ (для TimeLimiter)
     @GetMapping("/getTimeSlow")
     public ResponseEntity<TimeResponse> slow() throws InterruptedException {
         Thread.sleep(5000);
@@ -70,7 +67,6 @@ public class TestController {
         System.out.println("counter clear");
     }
 
-    // 🎯 кастомный статус
     @GetMapping("/status")
     public ResponseEntity<String> status(@RequestParam int code) {
         return ResponseEntity.status(code).body("Status: " + code);

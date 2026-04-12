@@ -71,7 +71,7 @@ resilience4j:
         recordExceptions:
           - feign.RetryableException
           - java.lang.RuntimeException
-          - java.util.concurrent.TimeoutException
+          - java.util.concurrent.TimeoutException #CB учитывать ошибки timlimiter`a
 
   retry:
     instances:
