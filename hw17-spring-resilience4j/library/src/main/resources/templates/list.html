@@ -30,6 +30,12 @@
             padding: 2px;
             padding-left: 30px;
         }
+
+        .time-display {
+            font-weight: normal;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
     </style>
 
     <style type="text/css" th:inline="text">
@@ -44,7 +50,10 @@
 
 <body>
 
-<h3 th:text="#{books-table-header}">Books:</h3>
+<h3>
+    <span th:text="#{books-table-header}">Books:</span>
+    <span class="time-display" th:text="${time}">[Время]</span>
+</h3>
 
 <table class="books">
     <thead>
@@ -72,15 +81,13 @@
             </form>
 
             <form th:action="@{/book/{id}(id=${book.id})}" method="get" class="action-form">
-                <button type="submit" class="action-btn edit-btn"
-                        th:text="#{edit-button-caption}">
+                <button type="submit" class="action-btn edit-btn" th:text="#{edit-button-caption}">
                     Edit
                 </button>
             </form>
 
             <!-- DELETE через fetch -->
-            <form class="delete-form"
-                  th:attr="data-id=${book.id}, data-title=${book.title}">
+            <form class="delete-form" th:attr="data-id=${book.id}, data-title=${book.title}">
                 <button type="submit">Удалить</button>
             </form>
 
@@ -95,8 +102,7 @@
         </td>
         <td>
             <form th:action="@{/book/new}" method="get" class="action-form">
-                <button type="submit" class="action-btn add-btn"
-                        th:text="#{add-new-book-button}">
+                <button type="submit" class="action-btn add-btn" th:text="#{add-new-book-button}">
                     Add New Book
                 </button>
             </form>
