@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Edit book</title>
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+
+        label {
+            display: inline-block;
+            width: 100px;
+        }
+
+        input:read-only {
+            background: lightgray;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+
+        h3 {
+            background-image: url("../static/listmark.png");
+            background-repeat: no-repeat;
+            padding: 2px;
+            padding-left: 30px;
+        }
+
+        .errors {
+            color: red;
+        }
+
+        .error-field {
+            border: 1px solid red;
+        }
+    </style>
+
+    <style type="text/css" th:inline="text">
+        [[h3]] {
+            background-image: url([[@{/listmark.png}]]);
+            background-repeat: no-repeat;
+            padding: 2px;
+            padding-left: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<form id="edit-form" th:action="@{/updateBook}" th:method="post" th:object="${book}">
+
+    <h3 th:text = "#{book-form-header}">Book Info:</h3>
+
+    <!-- ID (readonly) -->
+    <div class="row">
+        <label for="id-input" th:text="#{book-field-id} + ':'">ID:</label>
+        <input id="id-input" type="text" readonly="readonly" name="id" th:value="*{getId()}" value="1"/>
+    </div>
+
+    <!-- Title -->
+    <div class="row">
+        <label for="book-name-input" th:text="#{book-field-name} + ':'">Name:</label>
+        <input id="book-name-input" name="title" type="text" th:value="*{getTitle()}" value="Harry Potter"/>
+        <div class="errors" id="error-title"></div>
+    </div>
+
+    <!-- Author -->
+    <div class="row">
+        <label for="book-author-select" th:text="#{book-field-author} + ':'">Author:</label>
+        <select id="book-author-select" name="authorId">
+            <option value="">-- Выберите автора --</option>
+            <option th:each="author : ${allAuthors}"
+                    th:value="${author.getId()}"
+                    th:text="${author.getFullName()}"
+                    th:selected="${book.getAuthorId() == author.id}">
+            </option>
+        </select>
+        <div class="errors" id="error-authorId"></div>
+    </div>
+
+    <!-- Genre -->
+    <div class="row">
+        <label for="book-genre-select" th:text="#{book-field-genre} + ':'">Genre:</label>
+        <select id="book-genre-select" name="genreId">
+            <option value="">-- Выберите жанр --</option>
+            <option th:each="genre : ${allGenres}"
+                    th:value="${genre.getId()}"
+                    th:text="${genre.getName()}"
+                    th:selected="${book.getGenreId() == genre.id}">
+            </option>
+        </select>
+        <div class="errors" id="error-genreId"></div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="row">
+        <button type="submit" th:text="#{save-button-caption}">Save</button>
+        <a href="list.html" th:href="@{/book}"><button type="button" th:text="#{cancel-button-caption}">Cancel</button></a>
+    </div>
+</form>
+
+<script>
+    document.getElementById('edit-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const id = form.querySelector('#id-input').value;
+
+        const bookDto = {
+            id: Number(id),
+            title: form.querySelector('[name="title"]').value.trim(),
+            authorId: form.querySelector('[name="authorId"]').value
+                ? Number(form.querySelector('[name="authorId"]').value)
+                : null,
+            genreId: form.querySelector('[name="genreId"]').value
+                ? Number(form.querySelector('[name="genreId"]').value)
+                : null
+        };
+
+        form.querySelectorAll('.errors').forEach(e => e.innerText = '');
+        form.querySelectorAll('.error-field').forEach(e => e.classList.remove('error-field'));
+
+        fetch(`/book/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bookDto)
+        })
+            .then(async response => {
+                if (response.status === 400) {
+                    const errors = await response.json();
+                    Object.keys(errors).forEach(field => {
+                        const input = form.querySelector(`[name="${field}"]`);
+                        if (input) {
+                            input.classList.add('error-field');
+                            const errorBlock = document.getElementById(`error-${field}`);
+                            if (errorBlock) {
+                                errorBlock.innerText = errors[field];
+                            }
+                        }
+                    });
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Ошибка сохранения');
+                }
+
+                window.location.href = '/book';
+            })
+            .catch(error => alert(error.message));
+    });
+</script>
+
+</body>
+</html>
