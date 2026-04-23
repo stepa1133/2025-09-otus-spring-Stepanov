@@ -1,5 +1,0 @@
-spring:
-  application:
-    name: hw
-server:
-  port: 8084
