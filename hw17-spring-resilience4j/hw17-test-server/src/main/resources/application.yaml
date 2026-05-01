@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: hw
+server:
+  port: 8084
+
+time:
+  api:
+    url: https://smartapp-code.sberdevices.ru/tools/api

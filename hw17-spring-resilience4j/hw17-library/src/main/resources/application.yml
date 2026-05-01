@@ -1,0 +1,103 @@
+
+spring:
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+
+  shell:
+    interactive:
+      enabled: false
+    noninteractive:
+      enabled: false
+
+    command:
+      version:
+        enabled: false
+
+  datasource:
+    url: jdbc:h2:mem:maindb
+
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data.sql
+      schema-locations: classpath:schema.sql
+
+  h2:
+    console:
+      path: /h2-console
+      settings:
+        web-allow-others: true
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+    properties:
+      hibernate:
+        format_sql: true
+
+    show-sql: false
+
+
+server:
+  port: 8081
+
+logging:
+  file:
+    name: app.log
+  level:
+    io.github.resilience4j.circuitbreaker: DEBUG
+    org.springframework.cloud.openfeign: DEBUG
+    io.github.resilience4j.retry: DEBUG
+
+resilience4j:
+
+  timelimiter:
+    instances:
+      timeApi:
+        timeoutDuration: 2s
+        cancelRunningFuture: true
+
+  circuitbreaker:
+    instances:
+      timeApi:
+        minimumNumberOfCalls: 10      # количество необходимых вызовов для анализа circuitbreaker (для статистики)
+        slidingWindowSize: 5          # количество последних запросов, анализируемых CB
+        failureRateThreshold: 50      # % ошибок для открытия circuit breaker
+        waitDurationInOpenState: 2s   # сколько ждать для перехода OPEN -> HALF_OPEN
+        permittedNumberOfCallsInHalfOpenState: 3 # кол-во успешн. запросов должно для перехода из HALF_OPEN -> CLOSED
+        recordExceptions:
+          - feign.RetryableException
+          - java.lang.RuntimeException
+          - java.util.concurrent.TimeoutException #CB учитывать ошибки timlimiter`a
+
+  retry:
+    instances:
+     timeApi:
+      max-attempts: 6
+      wait-duration: 500ms
+      retry-exceptions:
+        - java.io.IOException
+        - java.lang.RuntimeException
+        - java.util.concurrent.TimeoutException
+        - feign.RetryableException
+        - feign.FeignException
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,circuitbreakers,circuitbreakerevents
+
+  endpoint:
+    health:
+      show-details: always
+
+  health:
+    circuitbreakers:
+      enabled: true
+
+
+
